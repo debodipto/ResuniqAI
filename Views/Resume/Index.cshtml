@@ -1,0 +1,50 @@
+@model List<ResuniqAI.Models.Resume>
+
+<div class="container mt-4">
+
+    <h2>📄 My Resumes</h2>
+
+    <a href="/Resume/Create" class="btn btn-primary mb-3">
+        + Create Resume
+    </a>
+
+    <div class="row">
+
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-3">
+
+                <div class="card-box">
+
+                    <h4>@item.FullName</h4>
+                    <p>@item.Email</p>
+                    <p>@item.Phone</p>
+
+                    <!-- AI Improve -->
+                    <a href="/Resume/GenerateAI?id=@item.Id" class="btn btn-warning w-100">
+                        🤖 AI Improve
+                    </a>
+
+                    <!-- ATS Score -->
+                    <a href="/AI/ATS?id=@item.Id" class="btn btn-info w-100 mt-2">
+                        📊 ATS Score
+                    </a>
+
+                    <!-- Cover Letter -->
+                    <a href="/AI/CoverLetter?id=@item.Id" class="btn btn-dark w-100 mt-2">
+                        ✉️ Cover Letter
+                    </a>
+
+                    <!-- PDF Download -->
+                    <a href="/Resume/DownloadPdf?id=@item.Id" class="btn btn-success w-100 mt-2">
+                        📄 Download PDF
+                    </a>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>
