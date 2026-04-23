@@ -6,7 +6,7 @@ using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// IMPORTANT: Disable reload file watcher issue
+// Disable file watcher issue (Render fix)
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
 
@@ -36,8 +36,22 @@ QuestPDF.Settings.License = LicenseType.Community;
 
 var app = builder.Build();
 
+// ================= DB FIRST (CRITICAL FIX)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-// ================= SAFE SEED (NO MIGRATION ON RENDER)
+    try
+    {
+        db.Database.EnsureCreated(); // 🔥 IMPORTANT FIX FOR SQLITE ON RENDER
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"DB init error: {ex.Message}");
+    }
+}
+
+// ================= SAFE SEED AFTER DB EXISTS
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -66,15 +80,10 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// ================= ENV SAFE PIPELINE
+// ================= PIPELINE
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-
-    // ONLY DEV: migration allowed
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await db.Database.MigrateAsync();
 }
 else
 {
