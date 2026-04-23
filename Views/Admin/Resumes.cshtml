@@ -1,0 +1,27 @@
+@model List<ResuniqAI.Models.Resume>
+
+<h2>All Resumes</h2>
+
+<div class="table-responsive-panel mt-3">
+    <table class="table table-bordered">
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Action</th>
+        </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.FullName</td>
+            <td>@item.Email</td>
+            <td>
+                <a href="/Admin/DeleteResume?id=@item.Id" class="btn btn-danger btn-sm">
+                    Delete
+                </a>
+            </td>
+        </tr>
+    }
+
+    </table>
+</div>

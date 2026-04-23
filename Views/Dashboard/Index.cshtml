@@ -1,0 +1,117 @@
+@model IEnumerable<ResuniqAI.Models.Resume>
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Dashboard";
+
+    var resumes = Model ?? Enumerable.Empty<ResuniqAI.Models.Resume>();
+
+    var totalResume = resumes.Count();
+    var aiUses = resumes.Count(x => !string.IsNullOrWhiteSpace(x.Summary));
+    var isPro = User.IsInRole("Pro");
+}
+
+<div class="container-fluid dash-wrap">
+
+    <h2 class="title-main">My Resume Dashboard</h2>
+
+    <div class="row g-3">
+
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h6>Total Resumes</h6>
+                <h2>@totalResume</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h6>AI Improved</h6>
+                <h2>@aiUses</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card premium-card">
+                <h6>Current Plan</h6>
+
+                @if (isPro)
+                {
+                    <h3>PRO USER</h3>
+                    <p>All premium features unlocked</p>
+                }
+                else
+                {
+                    <h3>FREE USER</h3>
+
+                    <a href="/Payment/Upgrade"
+                       class="btn btn-warning btn-main mt-2">
+                        Upgrade Now
+                    </a>
+                }
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-4 mb-3">
+        <a href="/Resume/Create"
+           class="btn btn-primary btn-main">
+            Create New Resume
+        </a>
+    </div>
+
+    <div class="row g-3">
+
+        @if (resumes.Any())
+        {
+            foreach (var item in resumes)
+            {
+                <div class="col-md-4">
+                    <div class="resume-card">
+
+                        <h5>@item.FullName</h5>
+                        <div class="text-muted">@item.Email</div>
+                        <div>@item.Phone</div>
+
+                        @if (!string.IsNullOrWhiteSpace(item.Summary))
+                        {
+                            <div class="small-summary">
+                                <strong>AI Summary:</strong><br />
+                                @item.Summary
+                            </div>
+                        }
+
+                        <div class="mt-3 d-grid gap-2">
+
+                            <a href="/Resume/GenerateAI?id=@item.Id"
+                               class="btn btn-warning btn-sm">
+                                AI Improve
+                            </a>
+
+                            <a href="/Resume/DownloadPdf?id=@item.Id"
+                               class="btn btn-success btn-sm">
+                                Download PDF
+                            </a>
+
+                        </div>
+
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center">
+                <h4>No Resume Found</h4>
+
+                <a href="/Resume/Create"
+                   class="btn btn-primary mt-3">
+                    Create Resume
+                </a>
+            </div>
+        }
+
+    </div>
+
+</div>

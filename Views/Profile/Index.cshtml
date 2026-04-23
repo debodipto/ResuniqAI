@@ -1,0 +1,176 @@
+@model ResuniqAI.ViewModels.ProfileDashboardViewModel
+
+@{
+    ViewData["Title"] = "Profile Dashboard";
+}
+
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">Profile Dashboard</span>
+        <div class="row g-4 align-items-center mt-2">
+            <div class="col-lg-8">
+                <h1 class="hero-title">Manage your account, keep your profile updated, and track every resume from one place.</h1>
+                <p class="hero-subtitle mt-3">
+                    This page keeps your personal profile, recent resume work, plan status, and download actions in one dashboard.
+                </p>
+            </div>
+            <div class="col-lg-4">
+                <div class="glass-panel rounded-4 p-4">
+                    <div class="muted-copy">Current Plan</div>
+                    <h3 class="mt-2 text-white">@(Model.IsPro ? "Pro" : "Free")</h3>
+                    <div class="muted-copy mt-2">Email: @Model.Email</div>
+                    <div class="muted-copy">Updated: @Model.Profile.UpdatedAt.ToString("dd MMM yyyy")</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @if (TempData["ProfileSaved"] is string message)
+    {
+        <div class="alert alert-success mb-0">@message</div>
+    }
+
+    <section class="stat-grid">
+        <div class="metric-card">
+            <div class="muted-copy">Resumes Created</div>
+            <div class="kpi-number">@Model.ResumeCount</div>
+            <div class="muted-copy">All saved CV versions</div>
+        </div>
+        <div class="metric-card">
+            <div class="muted-copy">Premium Formats Used</div>
+            <div class="kpi-number">@Model.PremiumResumeCount</div>
+            <div class="muted-copy">Resumes using premium template families</div>
+        </div>
+        <div class="metric-card">
+            <div class="muted-copy">Payments Submitted</div>
+            <div class="kpi-number">@Model.PaymentCount</div>
+            <div class="muted-copy">Upgrade requests made from this account</div>
+        </div>
+        <div class="metric-card">
+            <div class="muted-copy">Approved Payments</div>
+            <div class="kpi-number">@Model.ApprovedPaymentCount</div>
+            <div class="muted-copy">Approved upgrade requests</div>
+        </div>
+    </section>
+
+    <section class="editor-layout">
+        <div class="builder-stack">
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Profile Information</h2>
+                        <p>Update the core information you want to keep saved with your account.</p>
+                    </div>
+                </div>
+
+                <form asp-action="Index" method="post" class="form-grid">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="Profile.Id" type="hidden" />
+                    <input asp-for="Profile.UserId" type="hidden" />
+
+                    <div>
+                        <label asp-for="Profile.FullName" class="form-label">Full Name</label>
+                        <input asp-for="Profile.FullName" class="form-control" />
+                    </div>
+                    <div>
+                        <label asp-for="Email" class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" />
+                    </div>
+                    <div>
+                        <label asp-for="Profile.Headline" class="form-label">Headline</label>
+                        <input asp-for="Profile.Headline" class="form-control" />
+                    </div>
+                    <div>
+                        <label asp-for="Profile.Location" class="form-label">Location</label>
+                        <input asp-for="Profile.Location" class="form-control" />
+                    </div>
+                    <div>
+                        <label asp-for="Profile.Phone" class="form-label">Phone</label>
+                        <input asp-for="Profile.Phone" class="form-control" />
+                    </div>
+                    <div>
+                        <label asp-for="Profile.Portfolio" class="form-label">Portfolio</label>
+                        <input asp-for="Profile.Portfolio" class="form-control" />
+                    </div>
+                    <div>
+                        <label asp-for="Profile.LinkedIn" class="form-label">LinkedIn</label>
+                        <input asp-for="Profile.LinkedIn" class="form-control" />
+                    </div>
+                    <div>
+                        <label asp-for="Profile.Github" class="form-label">GitHub</label>
+                        <input asp-for="Profile.Github" class="form-control" />
+                    </div>
+                    <div class="field-full">
+                        <label asp-for="Profile.Bio" class="form-label">Bio</label>
+                        <textarea asp-for="Profile.Bio" class="form-control" rows="5"></textarea>
+                    </div>
+                    <div class="field-full d-flex flex-wrap gap-3">
+                        <button type="submit" class="btn btn-brand">Save Profile</button>
+                        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-soft">Open Identity Settings</a>
+                    </div>
+                </form>
+            </section>
+        </div>
+
+        <aside class="builder-stack">
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Account Snapshot</h2>
+                        <p>Your saved account-level details.</p>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <div><strong>Name:</strong> @Model.Profile.FullName</div>
+                    <div><strong>Email:</strong> @Model.Email</div>
+                    <div><strong>Headline:</strong> @Model.Profile.Headline</div>
+                    <div><strong>Location:</strong> @Model.Profile.Location</div>
+                    <div><strong>Phone:</strong> @Model.Profile.Phone</div>
+                </div>
+            </section>
+        </aside>
+    </section>
+
+    <section class="builder-panel">
+        <div class="section-heading">
+            <div>
+                <h2>Recent Resume Activity</h2>
+                <p>See how many CVs you built and download them directly from your profile dashboard.</p>
+            </div>
+        </div>
+
+        @if (Model.Resumes.Any())
+        {
+            <div class="resume-grid">
+                @foreach (var resume in Model.Resumes)
+                {
+                    <article class="resume-card">
+                        <h3>@resume.FullName</h3>
+                        <div class="muted-copy">@resume.Email</div>
+                        <div class="muted-copy">Template: @resume.TemplateKey</div>
+                        <div class="muted-copy">Paper: @resume.PageSize</div>
+
+                        @if (!string.IsNullOrWhiteSpace(resume.Summary))
+                        {
+                            <div class="page-note mt-3">@resume.Summary</div>
+                        }
+
+                        <div class="d-flex flex-wrap gap-2 mt-4">
+                            <a asp-controller="Resume" asp-action="Edit" asp-route-id="@resume.Id" class="btn btn-brand">Edit</a>
+                            <a asp-controller="Resume" asp-action="DownloadPdf" asp-route-id="@resume.Id" class="btn btn-outline-brand">Download PDF</a>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="list-panel text-center">
+                <h3>No resumes yet</h3>
+                <p class="muted-copy">Start a resume and it will appear here automatically.</p>
+                <a asp-controller="Resume" asp-action="Create" class="btn btn-brand">Create Resume</a>
+            </div>
+        }
+    </section>
+</div>

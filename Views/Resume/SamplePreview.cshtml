@@ -1,0 +1,332 @@
+@model ResuniqAI.ViewModels.ResumeEditorViewModel
+
+@{
+    ViewData["Title"] = "Sample Resume Preview";
+    var displayName = string.IsNullOrWhiteSpace(Model.Resume.FullName) ? Model.SelectedTemplate.SampleName : Model.Resume.FullName;
+    var displayRole = string.IsNullOrWhiteSpace(Model.Resume.PositionTitle) ? Model.SelectedTemplate.SampleRole : Model.Resume.PositionTitle;
+    var headerContacts = new[]
+    {
+        Model.Resume.Email,
+        Model.Resume.Phone,
+        Model.Resume.Address,
+        Model.Resume.LinkedIn,
+        Model.Resume.Github,
+        Model.Resume.Portfolio
+    }.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+}
+
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">Sample Preview</span>
+        <div class="row g-4 align-items-center mt-2">
+            <div class="col-lg-8">
+                <h1 class="hero-title">@Model.SelectedTemplate.Name sample resume</h1>
+                <p class="hero-subtitle mt-3">
+                    Review the sample on a full resume page, see how the layout feels, then open it in the editor if you want to customize the content.
+                </p>
+
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <a asp-controller="Resume"
+                       asp-action="SampleEditor"
+                       asp-route-template="@Model.SelectedTemplateKey"
+                       class="btn btn-light btn-lg">
+                        Edit This Sample
+                    </a>
+                    <a asp-controller="Resume"
+                       asp-action="Create"
+                       asp-route-template="@Model.SelectedTemplateKey"
+                       class="btn btn-brand btn-lg">
+                        Start With This Template
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="glass-panel rounded-4 p-4">
+                    <div class="muted-copy">Template</div>
+                    <h3 class="mt-2 text-white">@Model.SelectedTemplate.Name</h3>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <span class="chip">@Model.SelectedTemplate.Category</span>
+                        <span class="chip">@Model.Resume.PageSize paper</span>
+                    </div>
+                    <p class="hero-subtitle mt-3 mb-0">@Model.SelectedTemplate.Description</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="sample-preview-shell">
+        <aside class="sample-preview-meta">
+            <div class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Template Highlights</h2>
+                        <p>Why this resume design works well for the selected role and audience.</p>
+                    </div>
+                </div>
+
+                <ul class="bullet-list">
+                    @foreach (var item in Model.SelectedTemplate.Highlights)
+                    {
+                        <li>@item</li>
+                    }
+                </ul>
+            </div>
+
+            <div class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Sample Profile</h2>
+                        <p>Preview the sample candidate details used in this design.</p>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <div><strong>Name:</strong> @displayName</div>
+                    <div><strong>Role:</strong> @displayRole</div>
+                    <div><strong>Email:</strong> @Model.Resume.Email</div>
+                    <div><strong>Phone:</strong> @Model.Resume.Phone</div>
+                    <div><strong>Location:</strong> @Model.Resume.Address</div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="paper-preview-stage sample-preview-stage">
+            <article class="resume-sample-sheet paper-size-@Model.Resume.PageSize.ToLowerInvariant() sample-preview-paper">
+                <div class="resume-sample-header" style="border-color: @Model.SelectedTemplate.Accent;">
+                    <h3>@displayName</h3>
+                    <p>@displayRole</p>
+                    @if (headerContacts.Any())
+                    {
+                        <div class="resume-sample-contact">
+                            @foreach (var item in headerContacts)
+                            {
+                                <span>@item</span>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="resume-sample-section">
+                    <h4>Profile</h4>
+                    <p>@Model.Resume.Summary</p>
+                </div>
+
+                <div class="resume-sample-section">
+                    <h4>Skills</h4>
+                    <p>@Model.Resume.Skills</p>
+                </div>
+
+                <div class="resume-sample-section">
+                    <h4>Experience</h4>
+                    @if (Model.ExperienceEntries.Any(x =>
+                        !string.IsNullOrWhiteSpace(x.CompanyName) ||
+                        !string.IsNullOrWhiteSpace(x.PositionTitle) ||
+                        !string.IsNullOrWhiteSpace(x.Responsibilities) ||
+                        !string.IsNullOrWhiteSpace(x.Achievements)))
+                    {
+                        <div class="resume-entry-list">
+                            @foreach (var entry in Model.ExperienceEntries.Where(x =>
+                                !string.IsNullOrWhiteSpace(x.CompanyName) ||
+                                !string.IsNullOrWhiteSpace(x.PositionTitle) ||
+                                !string.IsNullOrWhiteSpace(x.Responsibilities) ||
+                                !string.IsNullOrWhiteSpace(x.Achievements)))
+                            {
+                                var experienceMeta = new List<string>();
+                                if (!string.IsNullOrWhiteSpace(entry.EmploymentDuration))
+                                {
+                                    experienceMeta.Add(entry.EmploymentDuration);
+                                }
+                                if (!string.IsNullOrWhiteSpace(entry.EmploymentLocation))
+                                {
+                                    experienceMeta.Add(entry.EmploymentLocation);
+                                }
+
+                                <div class="resume-entry-block">
+                                    <div class="resume-entry-title">
+                                        @if (!string.IsNullOrWhiteSpace(entry.PositionTitle) && !string.IsNullOrWhiteSpace(entry.CompanyName))
+                                        {
+                                            <strong>@entry.PositionTitle</strong>
+                                            <span> at <strong>@entry.CompanyName</strong></span>
+                                        }
+                                        else if (!string.IsNullOrWhiteSpace(entry.PositionTitle))
+                                        {
+                                            <strong>@entry.PositionTitle</strong>
+                                        }
+                                        else if (!string.IsNullOrWhiteSpace(entry.CompanyName))
+                                        {
+                                            <strong>@entry.CompanyName</strong>
+                                        }
+                                    </div>
+                                    @if (experienceMeta.Any())
+                                    {
+                                        <div class="resume-entry-meta">@string.Join(" | ", experienceMeta)</div>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(entry.Responsibilities))
+                                    {
+                                        <p>@entry.Responsibilities</p>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(entry.Achievements))
+                                    {
+                                        <p>@entry.Achievements</p>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p>@Model.Resume.Experience</p>
+                    }
+                </div>
+
+                <div class="resume-sample-section">
+                    <h4>Education</h4>
+                    @if (Model.EducationEntries.Any(x =>
+                        !string.IsNullOrWhiteSpace(x.DegreeName) ||
+                        !string.IsNullOrWhiteSpace(x.UniversityName) ||
+                        !string.IsNullOrWhiteSpace(x.Gpa)))
+                    {
+                        <div class="resume-entry-list">
+                            @foreach (var entry in Model.EducationEntries.Where(x =>
+                                !string.IsNullOrWhiteSpace(x.DegreeName) ||
+                                !string.IsNullOrWhiteSpace(x.UniversityName) ||
+                                !string.IsNullOrWhiteSpace(x.Gpa)))
+                            {
+                                var educationMeta = new List<string>();
+                                if (!string.IsNullOrWhiteSpace(entry.UniversityName))
+                                {
+                                    educationMeta.Add($"{entry.InstitutionType}: {entry.UniversityName}");
+                                }
+                                if (!string.IsNullOrWhiteSpace(entry.PassingYear))
+                                {
+                                    educationMeta.Add(entry.PassingYear);
+                                }
+                                if (!string.IsNullOrWhiteSpace(entry.Gpa))
+                                {
+                                    educationMeta.Add($"{entry.GradeLabel}: {entry.Gpa}");
+                                }
+
+                                <div class="resume-entry-block">
+                                    @if (!string.IsNullOrWhiteSpace(entry.DegreeName))
+                                    {
+                                        <div class="resume-entry-title"><strong>@entry.DegreeName</strong></div>
+                                    }
+                                    @if (educationMeta.Any())
+                                    {
+                                        <div class="resume-entry-meta">@string.Join(" | ", educationMeta)</div>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(entry.Details))
+                                    {
+                                        <p>@entry.Details</p>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p>@Model.Resume.Education</p>
+                    }
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Resume.Projects))
+                {
+                    <div class="resume-sample-section">
+                        <h4>Projects</h4>
+                        @if (Model.ProjectEntries.Any(x =>
+                            !string.IsNullOrWhiteSpace(x.ProjectName) ||
+                            !string.IsNullOrWhiteSpace(x.RoleName) ||
+                            !string.IsNullOrWhiteSpace(x.Details)))
+                        {
+                            <div class="resume-entry-list">
+                                @foreach (var entry in Model.ProjectEntries.Where(x =>
+                                    !string.IsNullOrWhiteSpace(x.ProjectName) ||
+                                    !string.IsNullOrWhiteSpace(x.RoleName) ||
+                                    !string.IsNullOrWhiteSpace(x.Details)))
+                                {
+                                    var projectMeta = new List<string>();
+                                    if (!string.IsNullOrWhiteSpace(entry.RoleName))
+                                    {
+                                        projectMeta.Add($"Role: {entry.RoleName}");
+                                    }
+                                    if (!string.IsNullOrWhiteSpace(entry.Duration))
+                                    {
+                                        projectMeta.Add(entry.Duration);
+                                    }
+                                    if (!string.IsNullOrWhiteSpace(entry.TechStack))
+                                    {
+                                        projectMeta.Add(entry.TechStack);
+                                    }
+
+                                    <div class="resume-entry-block">
+                                        @if (!string.IsNullOrWhiteSpace(entry.ProjectName))
+                                        {
+                                            <div class="resume-entry-title"><strong>@entry.ProjectName</strong></div>
+                                        }
+                                        @if (projectMeta.Any())
+                                        {
+                                            <div class="resume-entry-meta">@string.Join(" | ", projectMeta)</div>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(entry.Details))
+                                        {
+                                            <p>@entry.Details</p>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(entry.ProjectLink))
+                                        {
+                                            <p>@entry.ProjectLink</p>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p>@Model.Resume.Projects</p>
+                        }
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.Resume.LeadershipAndActivities))
+                {
+                    <div class="resume-sample-section">
+                        <h4>Leadership & Activities</h4>
+                        <p>@Model.Resume.LeadershipAndActivities</p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.Resume.Certifications))
+                {
+                    <div class="resume-sample-section">
+                        <h4>Certifications</h4>
+                        <p>@Model.Resume.Certifications</p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.Resume.Achievements))
+                {
+                    <div class="resume-sample-section">
+                        <h4>Achievements</h4>
+                        <p>@Model.Resume.Achievements</p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.Resume.AdditionalInformation))
+                {
+                    <div class="resume-sample-section">
+                        <h4>Additional Information</h4>
+                        <p>@Model.Resume.AdditionalInformation</p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.Resume.Reference))
+                {
+                    <div class="resume-sample-section">
+                        <h4>Reference</h4>
+                        <p>@Model.Resume.Reference</p>
+                    </div>
+                }
+            </article>
+        </div>
+    </section>
+</div>

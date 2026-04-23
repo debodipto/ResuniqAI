@@ -1,0 +1,74 @@
+@{
+    ViewData["Title"] = "Upgrade Plan";
+}
+
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">Upgrade</span>
+        <h1 class="hero-title mt-3">Unlock premium tools, stronger security signals and a better resume workflow.</h1>
+        <p class="hero-subtitle mt-3">The upgraded plan adds more templates, deeper AI support, stronger export options, SSL-ready trust messaging and priority assistance.</p>
+    </section>
+
+    @if (TempData["UpgradeError"] is string error)
+    {
+        <div class="alert alert-danger mb-0">@error</div>
+    }
+
+    <section class="feature-grid">
+        <div class="feature-card">
+            <h3>Free</h3>
+            <div class="kpi-number mt-2">$0</div>
+            <ul class="bullet-list mt-3">
+                <li>Access to core resume builder</li>
+                <li>ATS-friendly templates</li>
+                <li>Basic PDF export</li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h3>Pro</h3>
+            <div class="kpi-number mt-2">$19</div>
+            <ul class="bullet-list mt-3">
+                <li>All 18 templates</li>
+                <li>Advanced AI writing support</li>
+                <li>Priority export quality</li>
+                <li>SSL-ready trust messaging</li>
+                <li>Interview and job tracking tools</li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h3>Team</h3>
+            <div class="kpi-number mt-2">$49</div>
+            <ul class="bullet-list mt-3">
+                <li>Shared template workflow</li>
+                <li>Multi-user support</li>
+                <li>Review and approval process</li>
+                <li>Priority admin support</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="builder-panel">
+        <div class="section-heading">
+            <div>
+                <h2>Submit Upgrade Request</h2>
+                <p>Enter your payment transaction or reference number. The admin panel can approve it and upgrade your account.</p>
+            </div>
+        </div>
+
+        <form asp-controller="Payment" asp-action="ConfirmPayment" method="post" class="form-grid">
+            @Html.AntiForgeryToken()
+
+            <div class="field-full">
+                <label class="form-label" for="transactionId">Transaction or Reference Number</label>
+                <input id="transactionId" name="transactionId" class="form-control" placeholder="Enter your payment reference" />
+            </div>
+
+            <div class="field-full d-flex flex-wrap gap-3">
+                <button class="btn btn-brand" type="submit">Confirm Upgrade Request</button>
+                <a asp-controller="Templates" asp-action="Premium" class="btn btn-soft">Preview Premium Templates</a>
+            </div>
+        </form>
+    </section>
+</div>

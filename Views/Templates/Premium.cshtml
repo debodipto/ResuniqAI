@@ -1,0 +1,33 @@
+@model ResuniqAI.ViewModels.TemplateHubViewModel
+
+@{
+    ViewData["Title"] = "Premium Formats";
+    ViewData["ResumeId"] = Model.ResumeId;
+}
+
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">Premium Library</span>
+        <h1 class="hero-title mt-3">@Model.Title</h1>
+        <p class="hero-subtitle mt-3">@Model.Description</p>
+    </section>
+
+    <section class="feature-grid">
+        <div class="feature-card">
+            <h3>Leadership Presence</h3>
+            <p class="muted-copy">Stronger typography, spacing and tone for premium customer perception.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Role-Specific Looks</h3>
+            <p class="muted-copy">Designs fit leadership, product, creative, startup and consulting profiles.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Better Choice Architecture</h3>
+            <p class="muted-copy">Users can compare 12 distinct styles before they begin editing.</p>
+        </div>
+    </section>
+
+    <section>
+        @await Html.PartialAsync("_TemplateGrid", Model.PremiumTemplates)
+    </section>
+</div>

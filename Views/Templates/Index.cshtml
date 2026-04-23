@@ -1,0 +1,38 @@
+@model ResuniqAI.ViewModels.TemplateHubViewModel
+
+@{
+    ViewData["Title"] = "Template Library";
+    ViewData["ResumeId"] = Model.ResumeId;
+}
+
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">@(Model.AtsTemplates.Count + Model.PremiumTemplates.Count) Resume Formats</span>
+        <h1 class="hero-title mt-3">@Model.Title</h1>
+        <p class="hero-subtitle mt-3">@Model.Description</p>
+    </section>
+
+    <section>
+        <div class="section-heading">
+            <div>
+                <h2>ATS Friendly Section</h2>
+                <p>Six templates focused on readability, keyword matching and recruiter-system compatibility. Total: @Model.AtsTemplates.Count</p>
+            </div>
+            <a asp-controller="Templates" asp-action="Ats" asp-route-resumeId="@Model.ResumeId" class="btn btn-outline-brand">Open ATS Only</a>
+        </div>
+
+        @await Html.PartialAsync("_TemplateGrid", Model.AtsTemplates)
+    </section>
+
+    <section>
+        <div class="section-heading">
+            <div>
+                <h2>Premium Format Section</h2>
+                <p>Additional polished designs for customers who want a more branded, differentiated resume experience. Total: @Model.PremiumTemplates.Count</p>
+            </div>
+            <a asp-controller="Templates" asp-action="Premium" asp-route-resumeId="@Model.ResumeId" class="btn btn-outline-brand">Open Premium Only</a>
+        </div>
+
+        @await Html.PartialAsync("_TemplateGrid", Model.PremiumTemplates)
+    </section>
+</div>

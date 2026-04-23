@@ -1,0 +1,56 @@
+@model ResuniqAI.ViewModels.InterviewCoachViewModel
+
+@{
+    ViewData["Title"] = "Interview Score";
+}
+
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">Interview Result</span>
+        <h1 class="hero-title mt-3">Interview answer score report</h1>
+        <p class="hero-subtitle mt-3">Your answers were reviewed and scored on clarity, ownership, structure, and evidence.</p>
+    </section>
+
+    <section class="feature-grid interview-score-grid">
+        <article class="feature-card interview-score-card">
+            <div class="muted-copy">Final Score</div>
+            <div class="interview-score-number">@Model.InterviewScore<span>/@Model.InterviewScoreMax</span></div>
+            <p class="muted-copy mt-3">Score is shown out of 50.</p>
+        </article>
+
+        <article class="feature-card">
+            <h3>Feedback</h3>
+            <p class="muted-copy" style="white-space:pre-wrap">@Model.InterviewFeedback</p>
+        </article>
+
+        <article class="feature-card">
+            <h3>Mistakes Found</h3>
+            <p class="muted-copy" style="white-space:pre-wrap">@Model.MistakesFound</p>
+        </article>
+    </section>
+
+    <section class="builder-panel">
+        <div class="section-heading">
+            <div>
+                <h2>Interview Questions</h2>
+                <p>These are the questions used during the scoring flow.</p>
+            </div>
+        </div>
+        <textarea class="form-control" rows="8">@Model.InterviewQuestions</textarea>
+    </section>
+
+    <section class="builder-panel">
+        <div class="section-heading">
+            <div>
+                <h2>Your Answers</h2>
+                <p>Review the exact answers that were evaluated.</p>
+            </div>
+        </div>
+        <textarea class="form-control" rows="10">@Model.InterviewAnswers</textarea>
+    </section>
+
+    <div class="d-flex flex-wrap gap-3">
+        <a asp-controller="Features" asp-action="InterviewCoach" class="btn btn-brand">Try Again</a>
+        <a asp-controller="Resume" asp-action="Index" class="btn btn-soft">Back to Resume Workspace</a>
+    </div>
+</div>

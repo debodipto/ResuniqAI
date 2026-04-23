@@ -1,0 +1,33 @@
+@model ResuniqAI.ViewModels.TemplateHubViewModel
+
+@{
+    ViewData["Title"] = "ATS Templates";
+    ViewData["ResumeId"] = Model.ResumeId;
+}
+
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">ATS Friendly</span>
+        <h1 class="hero-title mt-3">@Model.Title</h1>
+        <p class="hero-subtitle mt-3">@Model.Description</p>
+    </section>
+
+    <section class="feature-grid">
+        <div class="feature-card">
+            <h3>Single-Column Bias</h3>
+            <p class="muted-copy">Layouts are cleaner and safer for machine parsing.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Keyword Ready</h3>
+            <p class="muted-copy">Sections are designed around summary, skills and measurable outcomes.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Recruiter Speed</h3>
+            <p class="muted-copy">The visual hierarchy helps human reviewers scan faster too.</p>
+        </div>
+    </section>
+
+    <section>
+        @await Html.PartialAsync("_TemplateGrid", Model.AtsTemplates)
+    </section>
+</div>

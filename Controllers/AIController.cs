@@ -15,25 +15,39 @@ namespace ResuniqAI.Controllers
             _ai = ai;
         }
 
-        public IActionResult ATS(int id)
+        // ATS Score
+        public async Task<IActionResult> ATS(int id)
         {
             var resume = _context.Resumes.FirstOrDefault(x => x.Id == id);
 
-            if (resume == null) return NotFound();
+            if (resume == null)
+                return NotFound();
 
-            int score = _ai.CalculateATSScore(resume.Skills, resume.Experience, resume.Education);
+            int score = await _ai.CalculateATSScore(
+                resume.Skills,
+                resume.Experience,
+                resume.Education
+            );
 
             ViewBag.Score = score;
+
             return View(resume);
         }
 
-        public IActionResult CoverLetter(int id)
+        // Cover Letter
+        public async Task<IActionResult> CoverLetter(int id)
         {
             var resume = _context.Resumes.FirstOrDefault(x => x.Id == id);
 
-            if (resume == null) return NotFound();
+            if (resume == null)
+                return NotFound();
 
-            ViewBag.Letter = _ai.GenerateCoverLetter(resume.FullName, "Software Engineer", resume.Skills);
+            string letter = await _ai.GenerateCoverLetter(
+                resume.FullName,
+                "Software Engineer"
+            );
+
+            ViewBag.Letter = letter;
 
             return View(resume);
         }

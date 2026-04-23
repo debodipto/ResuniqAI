@@ -1,35 +1,7 @@
-@model ResuniqAI.Models.Resume
+@model ResuniqAI.ViewModels.ResumeEditorViewModel
 
-<div class="container mt-5">
-    <div class="card-box">
+@{
+    ViewData["Title"] = "Create Resume";
+}
 
-        <h2>🧠 Build Your AI Resume</h2>
-        <p>Fill step by step to generate professional resume</p>
-
-        <form method="post">
-
-            <h5>Step 1: Personal Info</h5>
-            <input asp-for="FullName" class="form-control mb-2" placeholder="Full Name" />
-            <input asp-for="Email" class="form-control mb-2" placeholder="Email" />
-            <input asp-for="Phone" class="form-control mb-3" placeholder="Phone" />
-
-            <h5>Step 2: Summary</h5>
-            <textarea asp-for="Summary" class="form-control mb-3" placeholder="Write short summary"></textarea>
-
-            <h5>Step 3: Education</h5>
-            <textarea asp-for="Education" class="form-control mb-3" placeholder="Your education details"></textarea>
-
-            <h5>Step 4: Experience</h5>
-            <textarea asp-for="Experience" class="form-control mb-3" placeholder="Work experience"></textarea>
-
-            <h5>Step 5: Skills</h5>
-            <textarea asp-for="Skills" class="form-control mb-3" placeholder="Skills (e.g. C#, .NET, SQL)"></textarea>
-
-            <button type="submit" class="btn btn-success btn-lg w-100">
-                💾 Save Resume
-            </button>
-
-        </form>
-
-    </div>
-</div>
+@await Html.PartialAsync("_ResumeEditor", Model)

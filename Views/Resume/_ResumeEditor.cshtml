@@ -1,0 +1,873 @@
+@model ResuniqAI.ViewModels.ResumeEditorViewModel
+
+@{
+    var isEdit = Model.Resume.Id > 0;
+    var actionName = isEdit ? "Edit" : "Create";
+    var title = isEdit ? "Edit Resume & Format" : Model.IsSamplePreview ? "Sample Resume Preview" : "Create Resume";
+    var subtitle = isEdit
+        ? "Update content, add multiple experience and education entries, then choose the final resume design."
+        : Model.IsSamplePreview
+            ? "This sample opens inside the editor so you can review the layout, change the content and save it as your own resume."
+            : "Fill the details first, then choose the design that fits the final version of your CV.";
+    var headerContacts = new[]
+    {
+        Model.Resume.Email,
+        Model.Resume.Phone,
+        Model.Resume.Address,
+        Model.Resume.LinkedIn,
+        Model.Resume.Github,
+        Model.Resume.Portfolio
+    }.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+}
+
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">@actionName Builder</span>
+        <div class="row align-items-center g-4 mt-2">
+            <div class="col-lg-8">
+                <h1 class="hero-title">@title</h1>
+                <p class="hero-subtitle mt-3">@subtitle</p>
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <a asp-controller="Templates" asp-action="Index" class="btn btn-light">Explore All Formats</a>
+                    <a asp-controller="Resume" asp-action="Index" class="btn btn-brand">Back to Workspace</a>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="glass-panel rounded-4 p-4">
+                    <div class="muted-copy">Selected Template</div>
+                    <h3 class="mt-2 text-white">@Model.SelectedTemplate.Name</h3>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <span class="chip">@Model.SelectedTemplate.Category</span>
+                        <span class="chip">ATS @Model.SelectedTemplate.AtsScore</span>
+                    </div>
+                    <p class="hero-subtitle mt-3 mb-0">@Model.SelectedTemplate.Description</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <form asp-action="@actionName" method="post" class="editor-layout">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Resume.Id" />
+        <input type="hidden" asp-for="Resume.Id" />
+        <input type="hidden" asp-for="Resume.UserId" />
+        <input type="hidden" asp-for="IsSamplePreview" />
+
+        <div class="builder-stack">
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>AI Writing Assistant</h2>
+                        <p>Write one instruction and use it with the summary, experience, and education AI buttons.</p>
+                    </div>
+                </div>
+
+                <div class="field-full">
+                    <label asp-for="AiPrompt" class="form-label">AI Instruction</label>
+                    <textarea asp-for="AiPrompt" class="form-control" rows="3" placeholder="Example: Write a confident summary for a junior software engineer applying to remote product companies with strong teamwork and clean coding emphasis."></textarea>
+                    <div class="muted-copy mt-2">This instruction box is used by all AI Generate buttons below.</div>
+                </div>
+            </section>
+
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Personal Profile</h2>
+                        <p>Core identity fields shown across all resume formats.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div>
+                        <label asp-for="Resume.FullName" class="form-label">Full Name</label>
+                        <input asp-for="Resume.FullName" class="form-control" />
+                    </div>
+                    <div>
+                        <label asp-for="Resume.Email" class="form-label">Email</label>
+                        <input asp-for="Resume.Email" class="form-control" />
+                    </div>
+                    <div>
+                        <label asp-for="Resume.Phone" class="form-label">Phone</label>
+                        <input asp-for="Resume.Phone" class="form-control" />
+                    </div>
+                    <div>
+                        <label asp-for="Resume.Address" class="form-label">Address</label>
+                        <input asp-for="Resume.Address" class="form-control" />
+                    </div>
+                    <div>
+                        <label asp-for="Resume.LinkedIn" class="form-label">LinkedIn</label>
+                        <input asp-for="Resume.LinkedIn" class="form-control" />
+                    </div>
+                    <div>
+                        <label asp-for="Resume.Github" class="form-label">GitHub</label>
+                        <input asp-for="Resume.Github" class="form-control" />
+                    </div>
+                    <div class="field-full">
+                        <label asp-for="Resume.Portfolio" class="form-label">Portfolio / Website</label>
+                        <input asp-for="Resume.Portfolio" class="form-control" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Career Story</h2>
+                        <p>Write the summary and skills first, then move to the detailed experience and education blocks below.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="field-full">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <label asp-for="Resume.Summary" class="form-label mb-0">Professional Summary</label>
+                            <button type="submit" name="command" value="ai-summary" class="btn btn-soft">AI Generate Summary</button>
+                        </div>
+                        <textarea asp-for="Resume.Summary" class="form-control" rows="4"></textarea>
+                    </div>
+                    <div class="field-full">
+                        <label asp-for="Resume.Skills" class="form-label">Skills</label>
+                        <textarea asp-for="Resume.Skills" class="form-control" rows="4" placeholder="Leadership, .NET, SQL, CRM, stakeholder management"></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Professional Experience</h2>
+                        <p>Add up to 4 experience entries. The AI button updates the first filled block.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="submit" name="command" value="ai-experience" class="btn btn-soft">AI Generate Experience</button>
+                </div>
+
+                <div class="entry-stack">
+                    @for (var i = 0; i < Model.ExperienceEntries.Count; i++)
+                    {
+                        <div class="entry-card">
+                            <div class="section-heading">
+                                <div>
+                                    <h3>Experience @(i + 1)</h3>
+                                    <p>Use this block for one company and one role.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-grid">
+                                <div>
+                                    <label asp-for="ExperienceEntries[i].CompanyName" class="form-label">Company Name</label>
+                                    <input asp-for="ExperienceEntries[i].CompanyName" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="ExperienceEntries[i].PositionTitle" class="form-label">Position / Role</label>
+                                    <input asp-for="ExperienceEntries[i].PositionTitle" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="ExperienceEntries[i].EmploymentDuration" class="form-label">Duration</label>
+                                    <input asp-for="ExperienceEntries[i].EmploymentDuration" class="form-control" placeholder="Jan 2022 - Mar 2024" />
+                                </div>
+                                <div>
+                                    <label asp-for="ExperienceEntries[i].EmploymentLocation" class="form-label">Location</label>
+                                    <input asp-for="ExperienceEntries[i].EmploymentLocation" class="form-control" />
+                                </div>
+                                <div class="field-full">
+                                    <label asp-for="ExperienceEntries[i].Responsibilities" class="form-label">Responsibilities</label>
+                                    <textarea asp-for="ExperienceEntries[i].Responsibilities" class="form-control" rows="4" placeholder="Daily work, ownership, tools, collaboration"></textarea>
+                                </div>
+                                <div class="field-full">
+                                    <label asp-for="ExperienceEntries[i].Achievements" class="form-label">Achievements / Impact</label>
+                                    <textarea asp-for="ExperienceEntries[i].Achievements" class="form-control" rows="3" placeholder="Metrics, success, key contributions"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="field-full mt-3">
+                    <label asp-for="Resume.Experience" class="form-label">Experience Preview</label>
+                    <textarea asp-for="Resume.Experience" class="form-control" rows="10"></textarea>
+                </div>
+            </section>
+
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Education</h2>
+                        <p>Add up to 4 degree, diploma, or certification entries. The AI button updates the first filled block.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="submit" name="command" value="ai-education" class="btn btn-soft">AI Generate Education</button>
+                </div>
+
+                <div class="entry-stack">
+                    @for (var i = 0; i < Model.EducationEntries.Count; i++)
+                    {
+                        <div class="entry-card">
+                            <div class="section-heading">
+                                <div>
+                                    <h3>Education @(i + 1)</h3>
+                                    <p>Use this block for one degree or academic entry.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-grid">
+                                <div>
+                                    <label asp-for="EducationEntries[i].DegreeName" class="form-label">Degree Name</label>
+                                    <input asp-for="EducationEntries[i].DegreeName" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="EducationEntries[i].InstitutionType" class="form-label">Institution Type</label>
+                                    <select asp-for="EducationEntries[i].InstitutionType" class="form-select">
+                                        @foreach (var institutionType in Model.InstitutionTypes)
+                                        {
+                                            <option value="@institutionType">@institutionType</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div>
+                                    <label asp-for="EducationEntries[i].UniversityName" class="form-label">Institution Name</label>
+                                    <input asp-for="EducationEntries[i].UniversityName" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="EducationEntries[i].PassingYear" class="form-label">Passing Year</label>
+                                    <input asp-for="EducationEntries[i].PassingYear" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="EducationEntries[i].GradeLabel" class="form-label">Grade Type</label>
+                                    <select asp-for="EducationEntries[i].GradeLabel" class="form-select">
+                                        @foreach (var gradeLabel in Model.GradeLabels)
+                                        {
+                                            <option value="@gradeLabel">@gradeLabel</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div>
+                                    <label asp-for="EducationEntries[i].Gpa" class="form-label">Grade Value</label>
+                                    <input asp-for="EducationEntries[i].Gpa" class="form-control" />
+                                </div>
+                                <div class="field-full">
+                                    <label asp-for="EducationEntries[i].Details" class="form-label">Additional Details</label>
+                                    <textarea asp-for="EducationEntries[i].Details" class="form-control" rows="3" placeholder="Relevant coursework, thesis, achievements, academic strengths"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="field-full mt-3">
+                    <label asp-for="Resume.Education" class="form-label">Education Preview</label>
+                    <textarea asp-for="Resume.Education" class="form-control" rows="8"></textarea>
+                </div>
+            </section>
+
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Projects</h2>
+                        <p>Add up to 4 projects with name, stack, link and delivery details.</p>
+                    </div>
+                </div>
+
+                <div class="entry-stack">
+                    @for (var i = 0; i < Model.ProjectEntries.Count; i++)
+                    {
+                        <div class="entry-card">
+                            <div class="section-heading">
+                                <div>
+                                    <h3>Project @(i + 1)</h3>
+                                    <p>Use this block for one portfolio, academic or freelance project.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-grid">
+                                <div>
+                                    <label asp-for="ProjectEntries[i].ProjectName" class="form-label">Project Name</label>
+                                    <input asp-for="ProjectEntries[i].ProjectName" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="ProjectEntries[i].RoleName" class="form-label">Your Role</label>
+                                    <input asp-for="ProjectEntries[i].RoleName" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="ProjectEntries[i].Duration" class="form-label">Duration</label>
+                                    <input asp-for="ProjectEntries[i].Duration" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="ProjectEntries[i].TechStack" class="form-label">Tech Stack / Tools</label>
+                                    <input asp-for="ProjectEntries[i].TechStack" class="form-control" />
+                                </div>
+                                <div class="field-full">
+                                    <label asp-for="ProjectEntries[i].ProjectLink" class="form-label">Project Link</label>
+                                    <input asp-for="ProjectEntries[i].ProjectLink" class="form-control" />
+                                </div>
+                                <div class="field-full">
+                                    <label asp-for="ProjectEntries[i].Details" class="form-label">Project Details</label>
+                                    <textarea asp-for="ProjectEntries[i].Details" class="form-control" rows="4" placeholder="Scope, impact, responsibilities, outcomes"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="field-full mt-3">
+                    <label asp-for="Resume.Projects" class="form-label">Projects Preview</label>
+                    <textarea asp-for="Resume.Projects" class="form-control" rows="8"></textarea>
+                </div>
+            </section>
+
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Leadership & Activities</h2>
+                        <p>Add clubs, volunteering, campus leadership, event management or community work.</p>
+                    </div>
+                </div>
+
+                <div class="entry-stack">
+                    @for (var i = 0; i < Model.LeadershipEntries.Count; i++)
+                    {
+                        <div class="entry-card">
+                            <div class="section-heading">
+                                <div>
+                                    <h3>Leadership Entry @(i + 1)</h3>
+                                    <p>Use this block for one leadership, extracurricular or volunteer role.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-grid">
+                                <div>
+                                    <label asp-for="LeadershipEntries[i].OrganizationName" class="form-label">Organization</label>
+                                    <input asp-for="LeadershipEntries[i].OrganizationName" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="LeadershipEntries[i].RoleTitle" class="form-label">Role Title</label>
+                                    <input asp-for="LeadershipEntries[i].RoleTitle" class="form-control" />
+                                </div>
+                                <div class="field-full">
+                                    <label asp-for="LeadershipEntries[i].Duration" class="form-label">Duration</label>
+                                    <input asp-for="LeadershipEntries[i].Duration" class="form-control" />
+                                </div>
+                                <div class="field-full">
+                                    <label asp-for="LeadershipEntries[i].Details" class="form-label">Details</label>
+                                    <textarea asp-for="LeadershipEntries[i].Details" class="form-control" rows="4" placeholder="Responsibility, impact, event leadership, volunteering"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="field-full mt-3">
+                    <label asp-for="Resume.LeadershipAndActivities" class="form-label">Leadership & Activities Preview</label>
+                    <textarea asp-for="Resume.LeadershipAndActivities" class="form-control" rows="8"></textarea>
+                </div>
+            </section>
+
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Certifications</h2>
+                        <p>Add up to 4 certifications, courses or training credentials.</p>
+                    </div>
+                </div>
+
+                <div class="entry-stack">
+                    @for (var i = 0; i < Model.CertificationEntries.Count; i++)
+                    {
+                        <div class="entry-card">
+                            <div class="section-heading">
+                                <div>
+                                    <h3>Certification @(i + 1)</h3>
+                                    <p>Use this block for one certification or professional credential.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-grid">
+                                <div>
+                                    <label asp-for="CertificationEntries[i].CertificationName" class="form-label">Certification Name</label>
+                                    <input asp-for="CertificationEntries[i].CertificationName" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="CertificationEntries[i].Issuer" class="form-label">Issuer</label>
+                                    <input asp-for="CertificationEntries[i].Issuer" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="CertificationEntries[i].Year" class="form-label">Year</label>
+                                    <input asp-for="CertificationEntries[i].Year" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="CertificationEntries[i].CredentialId" class="form-label">Credential ID</label>
+                                    <input asp-for="CertificationEntries[i].CredentialId" class="form-control" />
+                                </div>
+                                <div class="field-full">
+                                    <label asp-for="CertificationEntries[i].Details" class="form-label">Details</label>
+                                    <textarea asp-for="CertificationEntries[i].Details" class="form-control" rows="3" placeholder="Relevant topics, score, platform, credential notes"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="field-full mt-3">
+                    <label asp-for="Resume.Certifications" class="form-label">Certifications Preview</label>
+                    <textarea asp-for="Resume.Certifications" class="form-control" rows="7"></textarea>
+                </div>
+            </section>
+
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Achievements</h2>
+                        <p>Add awards, competitions, recognitions or major results separate from job history.</p>
+                    </div>
+                </div>
+
+                <div class="entry-stack">
+                    @for (var i = 0; i < Model.AchievementEntries.Count; i++)
+                    {
+                        <div class="entry-card">
+                            <div class="section-heading">
+                                <div>
+                                    <h3>Achievement @(i + 1)</h3>
+                                    <p>Use this block for one award, recognition or notable accomplishment.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-grid">
+                                <div>
+                                    <label asp-for="AchievementEntries[i].Title" class="form-label">Title</label>
+                                    <input asp-for="AchievementEntries[i].Title" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="AchievementEntries[i].Issuer" class="form-label">Issuer / Awarded By</label>
+                                    <input asp-for="AchievementEntries[i].Issuer" class="form-control" />
+                                </div>
+                                <div class="field-full">
+                                    <label asp-for="AchievementEntries[i].Year" class="form-label">Year</label>
+                                    <input asp-for="AchievementEntries[i].Year" class="form-control" />
+                                </div>
+                                <div class="field-full">
+                                    <label asp-for="AchievementEntries[i].Details" class="form-label">Details</label>
+                                    <textarea asp-for="AchievementEntries[i].Details" class="form-control" rows="3" placeholder="Why it matters, scope, result"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="field-full mt-3">
+                    <label asp-for="Resume.Achievements" class="form-label">Achievements Preview</label>
+                    <textarea asp-for="Resume.Achievements" class="form-control" rows="7"></textarea>
+                </div>
+            </section>
+
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Additional Information</h2>
+                        <p>Add language, availability, interests, relocation, nationality or other supporting details.</p>
+                    </div>
+                </div>
+
+                <div class="field-full">
+                    <label asp-for="Resume.AdditionalInformation" class="form-label">Additional Information</label>
+                    <textarea asp-for="Resume.AdditionalInformation" class="form-control" rows="6" placeholder="Languages, notice period, interests, soft skills, travel availability, etc."></textarea>
+                </div>
+            </section>
+
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Reference</h2>
+                        <p>Add up to 3 references, or keep one line like "Available upon request".</p>
+                    </div>
+                </div>
+
+                <div class="entry-stack">
+                    @for (var i = 0; i < Model.ReferenceEntries.Count; i++)
+                    {
+                        <div class="entry-card">
+                            <div class="section-heading">
+                                <div>
+                                    <h3>Reference @(i + 1)</h3>
+                                    <p>Use this block for one professional or academic reference.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-grid">
+                                <div>
+                                    <label asp-for="ReferenceEntries[i].ReferenceName" class="form-label">Name</label>
+                                    <input asp-for="ReferenceEntries[i].ReferenceName" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="ReferenceEntries[i].PositionTitle" class="form-label">Position</label>
+                                    <input asp-for="ReferenceEntries[i].PositionTitle" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="ReferenceEntries[i].OrganizationName" class="form-label">Organization</label>
+                                    <input asp-for="ReferenceEntries[i].OrganizationName" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="ReferenceEntries[i].Email" class="form-label">Email</label>
+                                    <input asp-for="ReferenceEntries[i].Email" class="form-control" />
+                                </div>
+                                <div>
+                                    <label asp-for="ReferenceEntries[i].Phone" class="form-label">Phone</label>
+                                    <input asp-for="ReferenceEntries[i].Phone" class="form-control" />
+                                </div>
+                                <div class="field-full">
+                                    <label asp-for="ReferenceEntries[i].Details" class="form-label">Details</label>
+                                    <textarea asp-for="ReferenceEntries[i].Details" class="form-control" rows="3" placeholder="Relationship, department, availability or note"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="field-full mt-3">
+                    <label asp-for="Resume.Reference" class="form-label">Reference Preview</label>
+                    <textarea asp-for="Resume.Reference" class="form-control" rows="7"></textarea>
+                </div>
+            </section>
+
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Choose Your CV Design</h2>
+                        <p>Once the form is filled, choose the final design for this resume.</p>
+                    </div>
+                </div>
+
+                <div class="template-picker">
+                    @foreach (var template in Model.AtsTemplates.Concat(Model.PremiumTemplates))
+                    {
+                        <div class="template-option">
+                            <input type="radio"
+                                   asp-for="SelectedTemplateKey"
+                                   value="@template.Key"
+                                   id="final-template-@template.Key" />
+                            <label for="final-template-@template.Key">
+                                <div class="template-meta">
+                                    <div>
+                                        <strong>@template.Name</strong>
+                                        <span class="muted-copy">@template.BestFor</span>
+                                    </div>
+                                    <span class="chip">@template.Category</span>
+                                </div>
+                                <div class="mini-preview" style="background: linear-gradient(135deg, @template.Accent, #132238);">
+                                    <div>@template.Description</div>
+                                </div>
+                            </label>
+                        </div>
+                    }
+                </div>
+
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <button type="submit" class="btn btn-brand">@(isEdit ? "Save Changes" : "Create Resume")</button>
+                    <a asp-controller="Templates" asp-action="Index" class="btn btn-soft">See All Templates</a>
+                </div>
+            </section>
+
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Paper Size</h2>
+                        <p>Select the page size for the live preview and the downloaded PDF.</p>
+                    </div>
+                </div>
+
+                <div class="page-size-picker">
+                    @foreach (var pageSize in Model.PageSizes)
+                    {
+                        var pageId = $"page-size-{pageSize.ToLowerInvariant()}";
+                        <div class="template-option">
+                            <input type="radio"
+                                   asp-for="Resume.PageSize"
+                                   value="@pageSize"
+                                   id="@pageId" />
+                            <label for="@pageId">
+                                <div class="template-meta">
+                                    <div>
+                                        <strong>@pageSize</strong>
+                                        <span class="muted-copy">Use this paper size in preview and PDF</span>
+                                    </div>
+                                    <span class="chip">Paper</span>
+                                </div>
+                            </label>
+                        </div>
+                    }
+                </div>
+
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <button type="submit"
+                            formaction="@Url.Action("PreviewPdf", "Resume")"
+                            class="btn btn-outline-brand">
+                        Download PDF
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <aside class="builder-stack">
+            <section class="builder-panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Sample Layout Preview</h2>
+                        <p>Use this pane to review the selected template on the chosen paper size and edit from the same page.</p>
+                    </div>
+                </div>
+
+                <div class="paper-preview-stage">
+                    <article class="resume-sample-sheet paper-size-@Model.Resume.PageSize.ToLowerInvariant()">
+                        <div class="resume-sample-header" style="border-color: @Model.SelectedTemplate.Accent;">
+                            <h3>@(string.IsNullOrWhiteSpace(Model.Resume.FullName) ? Model.SelectedTemplate.SampleName : Model.Resume.FullName)</h3>
+                            <p>@(string.IsNullOrWhiteSpace(Model.Resume.PositionTitle) ? Model.SelectedTemplate.SampleRole : Model.Resume.PositionTitle)</p>
+                            @if (headerContacts.Any())
+                            {
+                                <div class="resume-sample-contact">
+                                    @foreach (var item in headerContacts)
+                                    {
+                                        <span>@item</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <div class="resume-sample-section">
+                            <h4>Profile</h4>
+                            <p>@Model.Resume.Summary</p>
+                        </div>
+
+                        <div class="resume-sample-section">
+                            <h4>Skills</h4>
+                            <p>@Model.Resume.Skills</p>
+                        </div>
+
+                        <div class="resume-sample-section">
+                            <h4>Experience</h4>
+                            @if (Model.ExperienceEntries.Any(x =>
+                                !string.IsNullOrWhiteSpace(x.CompanyName) ||
+                                !string.IsNullOrWhiteSpace(x.PositionTitle) ||
+                                !string.IsNullOrWhiteSpace(x.Responsibilities) ||
+                                !string.IsNullOrWhiteSpace(x.Achievements)))
+                            {
+                                <div class="resume-entry-list">
+                                    @foreach (var entry in Model.ExperienceEntries.Where(x =>
+                                        !string.IsNullOrWhiteSpace(x.CompanyName) ||
+                                        !string.IsNullOrWhiteSpace(x.PositionTitle) ||
+                                        !string.IsNullOrWhiteSpace(x.Responsibilities) ||
+                                        !string.IsNullOrWhiteSpace(x.Achievements)))
+                                    {
+                                        var experienceMeta = new List<string>();
+                                        if (!string.IsNullOrWhiteSpace(entry.EmploymentDuration))
+                                        {
+                                            experienceMeta.Add(entry.EmploymentDuration);
+                                        }
+                                        if (!string.IsNullOrWhiteSpace(entry.EmploymentLocation))
+                                        {
+                                            experienceMeta.Add(entry.EmploymentLocation);
+                                        }
+
+                                        <div class="resume-entry-block">
+                                            <div class="resume-entry-title">
+                                                @if (!string.IsNullOrWhiteSpace(entry.PositionTitle) && !string.IsNullOrWhiteSpace(entry.CompanyName))
+                                                {
+                                                    <strong>@entry.PositionTitle</strong>
+                                                    <span> at <strong>@entry.CompanyName</strong></span>
+                                                }
+                                                else if (!string.IsNullOrWhiteSpace(entry.PositionTitle))
+                                                {
+                                                    <strong>@entry.PositionTitle</strong>
+                                                }
+                                                else if (!string.IsNullOrWhiteSpace(entry.CompanyName))
+                                                {
+                                                    <strong>@entry.CompanyName</strong>
+                                                }
+                                            </div>
+                                            @if (experienceMeta.Any())
+                                            {
+                                                <div class="resume-entry-meta">@string.Join(" | ", experienceMeta)</div>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(entry.Responsibilities))
+                                            {
+                                                <p>@entry.Responsibilities</p>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(entry.Achievements))
+                                            {
+                                                <p>@entry.Achievements</p>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p>@Model.Resume.Experience</p>
+                            }
+                        </div>
+
+                        <div class="resume-sample-section">
+                            <h4>Education</h4>
+                            @if (Model.EducationEntries.Any(x =>
+                                !string.IsNullOrWhiteSpace(x.DegreeName) ||
+                                !string.IsNullOrWhiteSpace(x.UniversityName) ||
+                                !string.IsNullOrWhiteSpace(x.Gpa)))
+                            {
+                                <div class="resume-entry-list">
+                                    @foreach (var entry in Model.EducationEntries.Where(x =>
+                                        !string.IsNullOrWhiteSpace(x.DegreeName) ||
+                                        !string.IsNullOrWhiteSpace(x.UniversityName) ||
+                                        !string.IsNullOrWhiteSpace(x.Gpa)))
+                                    {
+                                        var educationMeta = new List<string>();
+                                        if (!string.IsNullOrWhiteSpace(entry.UniversityName))
+                                        {
+                                            educationMeta.Add($"{entry.InstitutionType}: {entry.UniversityName}");
+                                        }
+                                        if (!string.IsNullOrWhiteSpace(entry.PassingYear))
+                                        {
+                                            educationMeta.Add(entry.PassingYear);
+                                        }
+                                        if (!string.IsNullOrWhiteSpace(entry.Gpa))
+                                        {
+                                            educationMeta.Add($"{entry.GradeLabel}: {entry.Gpa}");
+                                        }
+
+                                        <div class="resume-entry-block">
+                                            @if (!string.IsNullOrWhiteSpace(entry.DegreeName))
+                                            {
+                                                <div class="resume-entry-title"><strong>@entry.DegreeName</strong></div>
+                                            }
+                                            @if (educationMeta.Any())
+                                            {
+                                                <div class="resume-entry-meta">@string.Join(" | ", educationMeta)</div>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(entry.Details))
+                                            {
+                                                <p>@entry.Details</p>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p>@Model.Resume.Education</p>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Resume.Projects))
+                        {
+                            <div class="resume-sample-section">
+                                <h4>Projects</h4>
+                                @if (Model.ProjectEntries.Any(x =>
+                                    !string.IsNullOrWhiteSpace(x.ProjectName) ||
+                                    !string.IsNullOrWhiteSpace(x.RoleName) ||
+                                    !string.IsNullOrWhiteSpace(x.Details)))
+                                {
+                                    <div class="resume-entry-list">
+                                        @foreach (var entry in Model.ProjectEntries.Where(x =>
+                                            !string.IsNullOrWhiteSpace(x.ProjectName) ||
+                                            !string.IsNullOrWhiteSpace(x.RoleName) ||
+                                            !string.IsNullOrWhiteSpace(x.Details)))
+                                        {
+                                            var projectMeta = new List<string>();
+                                            if (!string.IsNullOrWhiteSpace(entry.RoleName))
+                                            {
+                                                projectMeta.Add($"Role: {entry.RoleName}");
+                                            }
+                                            if (!string.IsNullOrWhiteSpace(entry.Duration))
+                                            {
+                                                projectMeta.Add(entry.Duration);
+                                            }
+                                            if (!string.IsNullOrWhiteSpace(entry.TechStack))
+                                            {
+                                                projectMeta.Add(entry.TechStack);
+                                            }
+
+                                            <div class="resume-entry-block">
+                                                @if (!string.IsNullOrWhiteSpace(entry.ProjectName))
+                                                {
+                                                    <div class="resume-entry-title"><strong>@entry.ProjectName</strong></div>
+                                                }
+                                                @if (projectMeta.Any())
+                                                {
+                                                    <div class="resume-entry-meta">@string.Join(" | ", projectMeta)</div>
+                                                }
+                                                @if (!string.IsNullOrWhiteSpace(entry.Details))
+                                                {
+                                                    <p>@entry.Details</p>
+                                                }
+                                                @if (!string.IsNullOrWhiteSpace(entry.ProjectLink))
+                                                {
+                                                    <p>@entry.ProjectLink</p>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p>@Model.Resume.Projects</p>
+                                }
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Resume.LeadershipAndActivities))
+                        {
+                            <div class="resume-sample-section">
+                                <h4>Leadership & Activities</h4>
+                                <p>@Model.Resume.LeadershipAndActivities</p>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Resume.Certifications))
+                        {
+                            <div class="resume-sample-section">
+                                <h4>Certifications</h4>
+                                <p>@Model.Resume.Certifications</p>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Resume.Achievements))
+                        {
+                            <div class="resume-sample-section">
+                                <h4>Achievements</h4>
+                                <p>@Model.Resume.Achievements</p>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Resume.AdditionalInformation))
+                        {
+                            <div class="resume-sample-section">
+                                <h4>Additional Information</h4>
+                                <p>@Model.Resume.AdditionalInformation</p>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Resume.Reference))
+                        {
+                            <div class="resume-sample-section">
+                                <h4>Reference</h4>
+                                <p>@Model.Resume.Reference</p>
+                            </div>
+                        }
+                    </article>
+                </div>
+
+                @if (isEdit)
+                {
+                    <a asp-controller="Resume"
+                       asp-action="DownloadPdf"
+                       asp-route-id="@Model.Resume.Id"
+                       class="btn btn-outline-brand mt-3">
+                        Download PDF
+                    </a>
+                }
+            </section>
+        </aside>
+    </form>
+</div>

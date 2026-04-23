@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "Upgrade Pending";
+}
+
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">Upgrade Request Sent</span>
+        <h1 class="hero-title mt-3">Your payment request is pending review.</h1>
+        <p class="hero-subtitle mt-3">Once an admin approves the payment, your account can be upgraded to the Pro plan.</p>
+    </section>
+
+    <section class="list-panel">
+        <h3>What happens next</h3>
+        <ul class="bullet-list mt-3">
+            <li>Your submitted transaction is stored in the admin payment list.</li>
+            <li>An admin can approve the request from the payment dashboard.</li>
+            <li>After approval, your account can receive the Pro role and features.</li>
+        </ul>
+
+        <div class="d-flex flex-wrap gap-3 mt-4">
+            <a asp-controller="Resume" asp-action="Index" class="btn btn-brand">Back to Workspace</a>
+            <a asp-controller="Payment" asp-action="Upgrade" class="btn btn-soft">Submit Another Reference</a>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,52 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">Admin Dashboard</span>
+        <h1 class="hero-title mt-3">Monitor resumes, users, payments and published jobs from one control panel.</h1>
+        <p class="hero-subtitle mt-3">This dashboard now includes the job publishing workflow used by the user Job Board.</p>
+    </section>
+
+    <section class="stat-grid">
+        <div class="metric-card">
+            <div class="muted-copy">Total Resumes</div>
+            <div class="kpi-number">@ViewBag.TotalResumes</div>
+            <div class="muted-copy">All resumes in the system</div>
+        </div>
+        <div class="metric-card">
+            <div class="muted-copy">Total Users</div>
+            <div class="kpi-number">@ViewBag.TotalUsers</div>
+            <div class="muted-copy">Registered accounts</div>
+        </div>
+        <div class="metric-card">
+            <div class="muted-copy">Payments</div>
+            <div class="kpi-number">@ViewBag.TotalPayments</div>
+            <div class="muted-copy">Submitted upgrade requests</div>
+        </div>
+        <div class="metric-card">
+            <div class="muted-copy">Jobs</div>
+            <div class="kpi-number">@ViewBag.TotalJobs</div>
+            <div class="muted-copy">Published job posts</div>
+        </div>
+    </section>
+
+    <section class="feature-grid">
+        <div class="feature-card">
+            <h3>Payments</h3>
+            <p class="muted-copy">Approve upgrade requests and assign the Pro role.</p>
+            <a asp-controller="Admin" asp-action="Payments" class="btn btn-soft">Open Payments</a>
+        </div>
+        <div class="feature-card">
+            <h3>Jobs</h3>
+            <p class="muted-copy">Create jobs that users can browse in the Job Board page.</p>
+            <a asp-controller="Admin" asp-action="Jobs" class="btn btn-soft">Manage Jobs</a>
+        </div>
+        <div class="feature-card">
+            <h3>Users</h3>
+            <p class="muted-copy">Review the current user base and access level.</p>
+            <a asp-controller="Admin" asp-action="Users" class="btn btn-soft">Open Users</a>
+        </div>
+    </section>
+</div>

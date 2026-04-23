@@ -1,41 +1,115 @@
-﻿<div class="hero">
-    <div class="container">
-        <h1>Resuniq AI</h1>
-        <p>Build Smarter Careers with AI-Powered Resume Creation</p>
-        <br />
-        <a href="/Identity/Account/Register" class="btn-main">Get Started Free</a>
+@{
+    ViewData["Title"] = "Command Center";
+}
 
-<p style="margin-top:20px;font-size:14px;opacity:.9;">
-    Crafted by <strong>Debodipto Samadder</strong>
-</p>
-    </div>
-</div>
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">AI Resume Operating System</span>
+        <div class="row align-items-center mt-3 g-4">
+            <div class="col-lg-8">
+                <h1 class="hero-title">Build polished resumes with templates, AI guidance and a complete career workflow in one place.</h1>
+                <p class="hero-subtitle mt-3">
+                    Resuniq AI gives your users a full resume workspace with 18 template choices, ATS-ready layouts,
+                    premium visual designs, AI writing support, interview preparation and job pipeline management.
+                </p>
 
-<div class="section">
-    <div class="container">
-        <div class="row g-4">
-
-            <div class="col-md-4">
-                <div class="card-box">
-                    <h4>🤖 AI Resume Writer</h4>
-                    <p>Create professional resume content instantly.</p>
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <a asp-controller="Templates" asp-action="Index" class="btn btn-light btn-lg">Browse 18 Templates</a>
+                    <a asp-controller="Resume" asp-action="Create" class="btn btn-brand btn-lg">Launch Resume Builder</a>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="card-box">
-                    <h4>📄 ATS Friendly Templates</h4>
-                    <p>Beat ATS systems and get more interviews.</p>
+            <div class="col-lg-4">
+                <div class="glass-panel rounded-4 p-4">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="muted-copy">ATS Formats</div>
+                            <div class="kpi-number">6</div>
+                        </div>
+                        <div>
+                            <div class="muted-copy">Premium Layouts</div>
+                            <div class="kpi-number">12</div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-grid gap-3">
+                        <div>
+                            <strong>Resume Builder</strong>
+                            <div class="muted-copy">Choose a template and edit in one screen.</div>
+                        </div>
+                        <div>
+                            <strong>Career Toolkit</strong>
+                            <div class="muted-copy">Cover letters, ATS checks and application workflow.</div>
+                        </div>
+                        <div>
+                            <strong>Customer-Ready UI</strong>
+                            <div class="muted-copy">Designed to feel polished, premium and fast.</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="col-md-4">
-                <div class="card-box">
-                    <h4>⚡ PDF Export</h4>
-                    <p>Download premium resumes in one click.</p>
-                </div>
-            </div>
-
         </div>
-    </div>
+    </section>
+
+    <section>
+        <div class="section-heading">
+            <div>
+                <h2>Platform Highlights</h2>
+                <p>Each section below adds real customer-facing value and improves the overall product experience.</p>
+            </div>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <span class="chip">01</span>
+                <h3 class="mt-3">Template Library</h3>
+                <p class="muted-copy">Users can compare ATS-safe and premium template families before starting.</p>
+            </div>
+            <div class="feature-card">
+                <span class="chip">02</span>
+                <h3 class="mt-3">Smart Builder</h3>
+                <p class="muted-copy">Resume editing and template selection live in the same workspace for less friction.</p>
+            </div>
+            <div class="feature-card">
+                <span class="chip">03</span>
+                <h3 class="mt-3">AI Writing Help</h3>
+                <p class="muted-copy">AI supports summaries, experience content and education details based on user instructions.</p>
+            </div>
+            <div class="feature-card">
+                <span class="chip">04</span>
+                <h3 class="mt-3">Interview Coach</h3>
+                <p class="muted-copy">Guided prompts and practice loops help users turn resumes into confident answers.</p>
+            </div>
+            <div class="feature-card">
+                <span class="chip">05</span>
+                <h3 class="mt-3">Job Tracker</h3>
+                <p class="muted-copy">A visual hiring pipeline makes the app feel like a complete career desk.</p>
+            </div>
+            <div class="feature-card">
+                <span class="chip">06</span>
+                <h3 class="mt-3">Premium Product Feel</h3>
+                <p class="muted-copy">Refined navigation, hierarchy and premium cards make the product presentation stronger.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="list-panel">
+        <div class="section-heading">
+            <div>
+                <h2>Ready-to-Use Pages</h2>
+                <p>These pages are now linked directly from the app sidebar for faster user access.</p>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-4"><a class="btn btn-soft w-100 text-start" asp-controller="Templates" asp-action="Index">Template Hub</a></div>
+            <div class="col-md-4"><a class="btn btn-soft w-100 text-start" asp-controller="Templates" asp-action="Ats">ATS Template Library</a></div>
+            <div class="col-md-4"><a class="btn btn-soft w-100 text-start" asp-controller="Templates" asp-action="Premium">Premium Format Library</a></div>
+            <div class="col-md-4"><a class="btn btn-soft w-100 text-start" asp-controller="Features" asp-action="Toolkit">Career Toolkit</a></div>
+            <div class="col-md-4"><a class="btn btn-soft w-100 text-start" asp-controller="Features" asp-action="InterviewCoach">Interview Coach</a></div>
+            <div class="col-md-4"><a class="btn btn-soft w-100 text-start" asp-controller="Features" asp-action="JobTracker">Job Tracker</a></div>
+        </div>
+    </section>
 </div>

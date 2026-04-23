@@ -1,50 +1,168 @@
-@model List<ResuniqAI.Models.Resume>
+@model ResuniqAI.ViewModels.ResumeWorkspaceViewModel
+@using ResuniqAI.Models
 
-<div class="container mt-4">
+@{
+    ViewData["Title"] = "Resume Workspace";
 
-    <h2>📄 My Resumes</h2>
+    var resumes = Model.Resumes ?? Array.Empty<Resume>();
+    var totalResume = resumes.Count;
+    var aiUses = resumes.Count(x => !string.IsNullOrWhiteSpace(x.Summary));
+    var atsReady = resumes.Count(x => (Model.Templates.TryGetValue(x.TemplateKey, out var template) ? template.AtsScore : 0) >= 94);
+    var isPro = User.IsInRole("Pro");
+    var totalTemplates = Model.Templates.Count;
+    var atsTemplateCount = Model.Templates.Values.Count(x => x.Category == "ATS Friendly");
+    var premiumTemplateCount = totalTemplates - atsTemplateCount;
+}
 
-    <a href="/Resume/Create" class="btn btn-primary mb-3">
-        + Create Resume
-    </a>
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">Resume Workspace</span>
+        <div class="row g-4 align-items-center mt-2">
+            <div class="col-lg-8">
+                <h1 class="hero-title">Manage resumes, switch formats, improve content with AI and export polished PDFs.</h1>
+                <p class="hero-subtitle mt-3">
+                    Your users can choose from @totalTemplates formats, including ATS-first templates and premium designs.
+                    Each resume card keeps editing, template switching and export one click away.
+                </p>
 
-    <div class="row">
-
-        @foreach (var item in Model)
-        {
-            <div class="col-md-4 mb-3">
-
-                <div class="card-box">
-
-                    <h4>@item.FullName</h4>
-                    <p>@item.Email</p>
-                    <p>@item.Phone</p>
-
-                    <!-- AI Improve -->
-                    <a href="/Resume/GenerateAI?id=@item.Id" class="btn btn-warning w-100">
-                        🤖 AI Improve
-                    </a>
-
-                    <!-- ATS Score -->
-                    <a href="/AI/ATS?id=@item.Id" class="btn btn-info w-100 mt-2">
-                        📊 ATS Score
-                    </a>
-
-                    <!-- Cover Letter -->
-                    <a href="/AI/CoverLetter?id=@item.Id" class="btn btn-dark w-100 mt-2">
-                        ✉️ Cover Letter
-                    </a>
-
-                    <!-- PDF Download -->
-                    <a href="/Resume/DownloadPdf?id=@item.Id" class="btn btn-success w-100 mt-2">
-                        📄 Download PDF
-                    </a>
-
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <a asp-controller="Resume" asp-action="Create" class="btn btn-light btn-lg">Create New Resume</a>
+                    <a asp-controller="Templates" asp-action="Index" class="btn btn-brand btn-lg">Browse Formats</a>
                 </div>
+            </div>
 
+            <div class="col-lg-4">
+                <div class="glass-panel rounded-4 p-4">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="muted-copy">Plan</div>
+                            <div class="kpi-number">@(isPro ? "Pro" : "Free")</div>
+                        </div>
+                        <div>
+                            <div class="muted-copy">ATS Ready</div>
+                            <div class="kpi-number">@atsReady</div>
+                        </div>
+                    </div>
+
+                    @if (!isPro)
+                    {
+                        <div class="page-note mt-3">
+                            Upgrade unlocks premium templates, AI writing boosts, SSL-ready trust messaging, advanced exports and priority support.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stat-grid">
+        <div class="metric-card">
+            <div class="muted-copy">Total Resumes</div>
+            <div class="kpi-number">@totalResume</div>
+            <div class="muted-copy">All saved resume drafts</div>
+        </div>
+        <div class="metric-card">
+            <div class="muted-copy">AI Enhanced</div>
+            <div class="kpi-number">@aiUses</div>
+            <div class="muted-copy">Summaries improved through AI</div>
+        </div>
+        <div class="metric-card">
+            <div class="muted-copy">ATS Friendly</div>
+            <div class="kpi-number">@atsReady</div>
+            <div class="muted-copy">Built with the @atsTemplateCount ATS-first formats</div>
+        </div>
+        <div class="metric-card">
+            <div class="muted-copy">Format Library</div>
+            <div class="kpi-number">@totalTemplates</div>
+            <div class="muted-copy">@atsTemplateCount ATS plus @premiumTemplateCount premium templates</div>
+        </div>
+    </section>
+
+    <section class="feature-grid">
+        <div class="feature-card">
+            <h3>ATS Ready Templates</h3>
+            <p class="muted-copy">Use clean, ATS-safe layouts for fast parsing and recruiter systems.</p>
+            <a asp-controller="Templates" asp-action="Ats" class="btn btn-outline-brand">Open ATS Section</a>
+        </div>
+        <div class="feature-card">
+            <h3>Premium Resume Styles</h3>
+            <p class="muted-copy">Offer branded, polished visual formats for customers who want strong differentiation.</p>
+            <a asp-controller="Templates" asp-action="Premium" class="btn btn-outline-brand">See Premium Formats</a>
+        </div>
+        <div class="feature-card">
+            <h3>Career Toolkit</h3>
+            <p class="muted-copy">Combine resume creation with interview prep and pipeline tracking from one product surface.</p>
+            <a asp-controller="Features" asp-action="Toolkit" class="btn btn-outline-brand">Open Toolkit</a>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-heading">
+            <div>
+                <h2>Saved Resumes</h2>
+                <p>Each card shows the current template so customers can switch formats before editing or downloading.</p>
+            </div>
+        </div>
+
+        @if (resumes.Any())
+        {
+            <div class="resume-grid">
+                @foreach (var item in resumes)
+                {
+                    var template = Model.Templates.TryGetValue(item.TemplateKey, out var match)
+                        ? match
+                        : Model.Templates["ats-clean"];
+
+                    <article class="resume-card">
+                        <div class="template-swatch" style="background: linear-gradient(135deg, @template.Accent, #132238);">
+                            <div>
+                                <small>@template.Category</small>
+                                <h3 class="mt-2 text-white">@template.Name</h3>
+                            </div>
+                            <div>
+                                <small>ATS Score</small>
+                                <div class="kpi-number text-white">@template.AtsScore</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-start mt-3">
+                            <div>
+                                <h3>@item.FullName</h3>
+                                <div class="muted-copy">@item.Email</div>
+                                <div class="muted-copy">@item.Phone</div>
+                            </div>
+                            <span class="chip">@template.Tone</span>
+                        </div>
+
+                        <p class="muted-copy mt-3">@template.Description</p>
+
+                        @if (!string.IsNullOrWhiteSpace(item.Summary))
+                        {
+                            <div class="page-note mt-3">
+                                @item.Summary
+                            </div>
+                        }
+
+                        <div class="d-flex flex-wrap gap-2 mt-4">
+                            <a asp-controller="Resume" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-brand">Edit Resume</a>
+                            <a asp-controller="Templates" asp-action="Index" asp-route-resumeId="@item.Id" class="btn btn-soft">Change Format</a>
+                            <a asp-controller="Resume" asp-action="GenerateAI" asp-route-id="@item.Id" class="btn btn-soft">AI Improve</a>
+                            <a asp-controller="Resume" asp-action="DownloadPdf" asp-route-id="@item.Id" class="btn btn-outline-brand">Download PDF</a>
+                        </div>
+                    </article>
+                }
             </div>
         }
-
-    </div>
-
+        else
+        {
+            <div class="list-panel text-center">
+                <h3>No resumes yet</h3>
+                <p class="muted-copy">Start with an ATS-friendly layout or jump into premium formats to make the first impression stronger.</p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap mt-3">
+                    <a asp-controller="Templates" asp-action="Ats" class="btn btn-brand">Use ATS Template</a>
+                    <a asp-controller="Templates" asp-action="Premium" class="btn btn-soft">See Premium Options</a>
+                </div>
+            </div>
+        }
+    </section>
 </div>

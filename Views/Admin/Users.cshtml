@@ -1,0 +1,21 @@
+@model List<Microsoft.AspNetCore.Identity.IdentityUser>
+
+<h2>Users List</h2>
+
+<div class="table-responsive-panel mt-3">
+    <table class="table table-bordered">
+        <tr>
+            <th>Email</th>
+            <th>User Name</th>
+        </tr>
+
+    @foreach (var user in Model)
+    {
+        <tr>
+            <td>@user.Email</td>
+            <td>@user.UserName</td>
+        </tr>
+    }
+
+    </table>
+</div>

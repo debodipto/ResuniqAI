@@ -1,21 +1,62 @@
 ﻿@page
 @model LogoutModel
 @{
-    ViewData["Title"] = "Log out";
+    ViewData["Title"] = "Logout";
 }
 
-<header>
-    <h1>@ViewData["Title"]</h1>
-    @{
-        if (User.Identity?.IsAuthenticated ?? false)
-        {
-            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
-                <button type="submit" class="nav-link btn btn-link text-dark">Click here to Logout</button>
-            </form>
-        }
-        else
-        {
-            <p>You have successfully logged out of the application.</p>
-        }
+<style>
+    body {
+        background: #0b1220;
+        font-family: 'Segoe UI', sans-serif;
     }
-</header>
+
+    .logout-box {
+        max-width: 420px;
+        margin: 120px auto;
+        background: #111827;
+        padding: 35px;
+        border-radius: 18px;
+        text-align: center;
+        color: white;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    }
+
+    .logout-title {
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .logout-text {
+        color: #9ca3af;
+        margin-bottom: 25px;
+    }
+
+    .btn-main {
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="logout-box">
+
+    <div class="logout-title">Logout</div>
+
+    <div class="logout-text">
+        Are you sure you want to logout from Resuniq AI?
+    </div>
+
+    <form method="post">
+
+        <button type="submit" class="btn btn-danger btn-main">
+            Yes, Logout
+        </button>
+
+        <a href="/" class="btn btn-light btn-main ms-2">
+            Cancel
+        </a>
+
+    </form>
+
+</div>

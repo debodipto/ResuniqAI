@@ -1,0 +1,114 @@
+@model ResuniqAI.ViewModels.InterviewCoachViewModel
+
+@{
+    ViewData["Title"] = "Interview Coach";
+}
+
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">Interview Coach</span>
+        <h1 class="hero-title mt-3">Upload or paste a CV, get tailored interview questions, then receive scoring and mistake analysis.</h1>
+        <p class="hero-subtitle mt-3">This page now includes both an interview review flow and an AI writing exam evaluator.</p>
+    </section>
+
+    <form asp-action="InterviewCoach" method="post" enctype="multipart/form-data" class="d-grid gap-4">
+        @Html.AntiForgeryToken()
+
+        <section class="builder-panel">
+            <div class="form-grid">
+                <div>
+                    <label asp-for="CandidateName" class="form-label">Candidate Name</label>
+                    <input asp-for="CandidateName" class="form-control" />
+                </div>
+                <div>
+                    <label asp-for="TargetRole" class="form-label">Target Role</label>
+                    <input asp-for="TargetRole" class="form-control" />
+                </div>
+                <div class="field-full">
+                    <label class="form-label">Upload CV File</label>
+                    <input type="file" name="cvFile" class="form-control" />
+                </div>
+                <div class="field-full">
+                    <label asp-for="ResumeText" class="form-label">CV Text</label>
+                    <textarea asp-for="ResumeText" class="form-control" rows="8" placeholder="Paste the full CV here if you are not uploading a text-based file."></textarea>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-3 mt-4">
+                <button type="submit" name="command" value="generate-questions" class="btn btn-brand">Generate Interview Questions</button>
+                <button type="submit" name="command" value="review-answers" class="btn btn-soft">Score Interview Answers</button>
+            </div>
+
+            <div class="muted-copy mt-3">First generate questions, then write the answers, then submit for a score page out of 50.</div>
+        </section>
+
+        <section class="builder-panel">
+            <div class="form-grid">
+                <div class="field-full">
+                    <label asp-for="InterviewQuestions" class="form-label">Interview Questions</label>
+                    <textarea asp-for="InterviewQuestions" class="form-control" rows="8"></textarea>
+                </div>
+                <div class="field-full">
+                    <label asp-for="InterviewAnswers" class="form-label">Your Answers</label>
+                    <textarea asp-for="InterviewAnswers" class="form-control" rows="8" placeholder="Answer the questions above, then click Score Interview Answers."></textarea>
+                </div>
+            </div>
+
+            @if (Model.InterviewScore > 0)
+            {
+                <div class="feature-grid mt-4">
+                    <div class="feature-card">
+                        <h3>Interview Score</h3>
+                        <div class="kpi-number">@Model.InterviewScore/@Model.InterviewScoreMax</div>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Feedback</h3>
+                        <p class="muted-copy" style="white-space:pre-wrap">@Model.InterviewFeedback</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Mistakes Found</h3>
+                        <p class="muted-copy" style="white-space:pre-wrap">@Model.MistakesFound</p>
+                    </div>
+                </div>
+            }
+        </section>
+
+        <section class="builder-panel">
+            <div class="section-heading">
+                <div>
+                    <h2>AI Writing Exam</h2>
+                    <p>Test written communication and get an instant score.</p>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="field-full">
+                    <label asp-for="WritingPrompt" class="form-label">Writing Prompt</label>
+                    <textarea asp-for="WritingPrompt" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="field-full">
+                    <label asp-for="WritingAnswer" class="form-label">Your Answer</label>
+                    <textarea asp-for="WritingAnswer" class="form-control" rows="8"></textarea>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-3 mt-4">
+                <button type="submit" name="command" value="writing-exam" class="btn btn-brand">Evaluate Writing Exam</button>
+            </div>
+
+            @if (Model.WritingScore > 0)
+            {
+                <div class="feature-grid mt-4">
+                    <div class="feature-card">
+                        <h3>Writing Score</h3>
+                        <div class="kpi-number">@Model.WritingScore</div>
+                    </div>
+                    <div class="feature-card field-full">
+                        <h3>Writing Feedback</h3>
+                        <p class="muted-copy" style="white-space:pre-wrap">@Model.WritingFeedback</p>
+                    </div>
+                </div>
+            }
+        </section>
+    </form>
+</div>

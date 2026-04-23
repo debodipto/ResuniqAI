@@ -1,0 +1,97 @@
+@model IReadOnlyList<ResuniqAI.Models.ResumeTemplateDefinition>
+
+@{
+    var resumeId = ViewData["ResumeId"] is int id ? id : (int?)null;
+    var canUsePremium = ViewData["CanUsePremium"] as bool? ?? false;
+}
+
+<div class="template-grid">
+    @if (!Model.Any())
+    {
+        <div class="list-panel">
+            <h3>No templates found</h3>
+            <p class="muted-copy">Template data is not available right now. Please reload the page.</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var template in Model)
+        {
+            var isPremium = template.Category == "Premium Formats";
+            var canUseThisTemplate = !isPremium || canUsePremium;
+
+            <article class="template-card">
+                <div class="template-swatch" style="background: linear-gradient(135deg, @template.Accent, #132238);">
+                    <div>
+                        <small>@template.Category</small>
+                        <h3 class="mt-2 text-white">@template.Name</h3>
+                    </div>
+                    <div>
+                        <small>ATS Compatibility</small>
+                        <div class="kpi-number text-white">@template.AtsScore</div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-start mt-3">
+                    <div>
+                        <h3>@template.Name</h3>
+                        <div class="muted-copy">@template.BestFor</div>
+                    </div>
+                    <span class="chip">@template.Tone</span>
+                </div>
+
+                <p class="muted-copy mt-3">@template.Description</p>
+
+                @if (isPremium && !canUsePremium)
+                {
+                    <div class="page-note mt-3">
+                        Premium templates can be previewed by everyone, but only Pro users can use or edit them.
+                    </div>
+                }
+
+                <ul class="bullet-list mt-3">
+                    @foreach (var item in template.Highlights)
+                    {
+                        <li>@item</li>
+                    }
+                </ul>
+
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    @if (canUseThisTemplate)
+                    {
+                        @if (resumeId.HasValue)
+                        {
+                            <a asp-controller="Resume"
+                               asp-action="Edit"
+                               asp-route-id="@resumeId.Value"
+                               asp-route-template="@template.Key"
+                               class="btn btn-brand">
+                                Use On Existing Resume
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Resume"
+                               asp-action="Create"
+                               asp-route-template="@template.Key"
+                               class="btn btn-brand">
+                                Start With This
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <a asp-controller="Payment" asp-action="Upgrade" class="btn btn-brand">Unlock Pro</a>
+                    }
+
+                    <a asp-controller="Resume"
+                       asp-action="SamplePreview"
+                       asp-route-template="@template.Key"
+                       class="btn btn-soft">
+                        Sample Preview
+                    </a>
+                </div>
+            </article>
+        }
+    }
+</div>

@@ -1,0 +1,74 @@
+@model ResuniqAI.ViewModels.JobTrackerViewModel
+
+@{
+    ViewData["Title"] = "Job Tracker";
+}
+
+<div class="d-grid gap-4">
+    <section class="hero-panel">
+        <span class="eyebrow">Job Board</span>
+        <h1 class="hero-title mt-3">Browse newly published jobs and track opportunities from one place.</h1>
+        <p class="hero-subtitle mt-3">Admins can publish roles from the admin panel, and users can review the newest active openings here.</p>
+    </section>
+
+    <section class="feature-grid">
+        <div class="feature-card">
+            <h3>Latest Openings</h3>
+            <p class="muted-copy">Every active job added by the admin appears on this page automatically.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Resume Matching</h3>
+            <p class="muted-copy">Use the ATS and interview tools to prepare for the roles listed here.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Faster Decisions</h3>
+            <p class="muted-copy">Review role requirements, location and expectations before applying.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-heading">
+            <div>
+                <h2>Open Jobs</h2>
+                <p>Only active jobs are shown to users.</p>
+            </div>
+        </div>
+
+        @if (Model.Jobs.Any())
+        {
+            <div class="template-grid">
+                @foreach (var job in Model.Jobs)
+                {
+                    <article class="template-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h3>@job.Title</h3>
+                                <div class="muted-copy">@job.CompanyName</div>
+                            </div>
+                            <span class="chip">@job.EmploymentType</span>
+                        </div>
+
+                        <p class="muted-copy mt-3">@job.Location</p>
+                        <p class="muted-copy">@job.SalaryRange</p>
+
+                        <div class="sample-resume-preview">
+                            <h4>Role Summary</h4>
+                            <p>@job.Description</p>
+                        </div>
+
+                        <div class="page-note mt-3">
+                            @job.Requirements
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="list-panel text-center">
+                <h3>No active jobs yet</h3>
+                <p class="muted-copy">Ask the admin to publish roles from the Jobs section in the admin panel.</p>
+            </div>
+        }
+    </section>
+</div>
