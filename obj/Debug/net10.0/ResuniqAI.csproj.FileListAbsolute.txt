@@ -2060,4 +2060,3 @@ D:\Projects\ResuniqAI\obj\Debug\net10.0\swae.build.ex.cache
 D:\Projects\ResuniqAI\obj\Debug\net10.0\ResuniqAI.csproj.Up2Date
 D:\Projects\ResuniqAI\obj\Debug\net10.0\ResuniqAI.genruntimeconfig.cache
 D:\Projects\ResuniqAI\obj\Debug\net10.0\ref\ResuniqAI.dll
-D:\Projects\ResuniqAI\bin\Debug\net10.0\ResuniqAI.exe

@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Data.Sqlite;
 using ResuniqAI.Data;
 using ResuniqAI.Models;
 using ResuniqAI.ViewModels;
+using System.Data;
 
 namespace ResuniqAI.Controllers
 {
@@ -141,23 +141,26 @@ namespace ResuniqAI.Controllers
 
         private async Task EnsureProfileStorageAsync()
         {
-            await _context.Database.MigrateAsync();
-
             var connection = _context.Database.GetDbConnection();
-            await connection.OpenAsync();
+            var shouldCloseConnection = connection.State != ConnectionState.Open;
 
-            await using var command = connection.CreateCommand();
-            command.CommandText = """
+            if (shouldCloseConnection)
+                await connection.OpenAsync();
+
+            try
+            {
+                await using var command = connection.CreateCommand();
+                command.CommandText = """
 SELECT COUNT(*)
 FROM sqlite_master
 WHERE type = 'table' AND name = 'UserProfiles';
 """;
 
-            var exists = Convert.ToInt32(await command.ExecuteScalarAsync()) > 0;
+                var exists = Convert.ToInt32(await command.ExecuteScalarAsync()) > 0;
 
-            if (!exists)
-            {
-                await _context.Database.ExecuteSqlRawAsync("""
+                if (!exists)
+                {
+                    await _context.Database.ExecuteSqlRawAsync("""
 CREATE TABLE IF NOT EXISTS "UserProfiles" (
     "Id" INTEGER NOT NULL CONSTRAINT "PK_UserProfiles" PRIMARY KEY AUTOINCREMENT,
     "UserId" TEXT NOT NULL,
@@ -172,6 +175,12 @@ CREATE TABLE IF NOT EXISTS "UserProfiles" (
     "UpdatedAt" TEXT NOT NULL
 );
 """);
+                }
+            }
+            finally
+            {
+                if (shouldCloseConnection)
+                    await connection.CloseAsync();
             }
         }
     }

@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ResuniqAI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ab82515393765417faeeb8a5959f55a46b750055")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a2fe7e552ce913dc08c661fc0d79600ebecd2e91")]
 [assembly: System.Reflection.AssemblyProductAttribute("ResuniqAI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ResuniqAI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
