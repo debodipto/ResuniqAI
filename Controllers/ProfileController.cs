@@ -75,15 +75,17 @@ namespace ResuniqAI.Controllers
                 _context.UserProfiles.Add(profile);
             }
 
+            var postedProfile = model.Profile ?? new UserProfile();
+
             profile.UserId = user.Id;
-            profile.FullName = model.Profile.FullName.Trim();
-            profile.Headline = model.Profile.Headline.Trim();
-            profile.Location = model.Profile.Location.Trim();
-            profile.Phone = model.Profile.Phone.Trim();
-            profile.LinkedIn = model.Profile.LinkedIn.Trim();
-            profile.Github = model.Profile.Github.Trim();
-            profile.Portfolio = model.Profile.Portfolio.Trim();
-            profile.Bio = model.Profile.Bio.Trim();
+            profile.FullName = Normalize(postedProfile.FullName);
+            profile.Headline = Normalize(postedProfile.Headline);
+            profile.Location = Normalize(postedProfile.Location);
+            profile.Phone = Normalize(postedProfile.Phone);
+            profile.LinkedIn = Normalize(postedProfile.LinkedIn);
+            profile.Github = Normalize(postedProfile.Github);
+            profile.Portfolio = Normalize(postedProfile.Portfolio);
+            profile.Bio = Normalize(postedProfile.Bio);
             profile.UpdatedAt = DateTime.Now;
 
             var normalizedEmail = (model.Email ?? string.Empty).Trim();
@@ -96,7 +98,29 @@ namespace ResuniqAI.Controllers
             if (!string.Equals(user.PhoneNumber, profile.Phone, StringComparison.Ordinal))
                 user.PhoneNumber = profile.Phone;
 
-            await _userManager.UpdateAsync(user);
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                var errors = string.Join(" ", updateResult.Errors.Select(x => x.Description));
+                ModelState.AddModelError(string.Empty, string.IsNullOrWhiteSpace(errors) ? "Unable to update your account right now." : errors);
+
+                model.Profile = profile;
+                model.Email = user.Email ?? normalizedEmail;
+                model.IsPro = await _userManager.IsInRoleAsync(user, "Pro");
+                model.ResumeCount = await _context.Resumes.CountAsync(x => x.UserId == user.Id);
+                model.PremiumResumeCount = await _context.Resumes.CountAsync(x => x.UserId == user.Id && x.TemplateKey != null && !x.TemplateKey.StartsWith("ats-", StringComparison.OrdinalIgnoreCase));
+                model.PaymentCount = await _context.Payments.CountAsync(x => x.UserEmail == (user.Email ?? string.Empty));
+                model.ApprovedPaymentCount = await _context.Payments.CountAsync(x => x.UserEmail == (user.Email ?? string.Empty) && x.IsApproved);
+                model.Resumes = await _context.Resumes
+                    .Where(x => x.UserId == user.Id)
+                    .OrderByDescending(x => x.Id)
+                    .Take(8)
+                    .ToListAsync();
+                model.IdentityUser = user;
+
+                return View(model);
+            }
+
             await _context.SaveChangesAsync();
 
             TempData["ProfileSaved"] = "Profile updated successfully.";
@@ -112,6 +136,8 @@ namespace ResuniqAI.Controllers
                 Phone = user.PhoneNumber ?? string.Empty
             };
         }
+
+        private static string Normalize(string? value) => value?.Trim() ?? string.Empty;
 
         private async Task EnsureProfileStorageAsync()
         {

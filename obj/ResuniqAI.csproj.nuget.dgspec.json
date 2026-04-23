@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Projects\\ResuniqAI\\ResuniqAI\\ResuniqAI.csproj": {}
+    "D:\\Projects\\ResuniqAI\\ResuniqAI.csproj": {}
   },
   "projects": {
-    "D:\\Projects\\ResuniqAI\\ResuniqAI\\ResuniqAI.csproj": {
+    "D:\\Projects\\ResuniqAI\\ResuniqAI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Projects\\ResuniqAI\\ResuniqAI\\ResuniqAI.csproj",
+        "projectUniqueName": "D:\\Projects\\ResuniqAI\\ResuniqAI.csproj",
         "projectName": "ResuniqAI",
-        "projectPath": "D:\\Projects\\ResuniqAI\\ResuniqAI\\ResuniqAI.csproj",
+        "projectPath": "D:\\Projects\\ResuniqAI\\ResuniqAI.csproj",
         "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\Projects\\ResuniqAI\\ResuniqAI\\obj\\",
+        "outputPath": "D:\\Projects\\ResuniqAI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config"

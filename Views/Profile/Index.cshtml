@@ -65,6 +65,7 @@
 
                 <form asp-action="Index" method="post" class="form-grid">
                     @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger field-full"></div>
                     <input asp-for="Profile.Id" type="hidden" />
                     <input asp-for="Profile.UserId" type="hidden" />
 

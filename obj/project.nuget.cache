@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "aUiBCETpFdU=",
+  "dgSpecHash": "9JbtFlge6so=",
   "success": true,
-  "projectFilePath": "D:\\Projects\\ResuniqAI\\ResuniqAI\\ResuniqAI.csproj",
+  "projectFilePath": "D:\\Projects\\ResuniqAI\\ResuniqAI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\user\\.nuget\\packages\\humanizer\\2.14.1\\humanizer.2.14.1.nupkg.sha512",
     "C:\\Users\\user\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
@@ -128,9 +128,9 @@
       "code": "NU1510",
       "level": "Warning",
       "message": "PackageReference System.Net.Http.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.",
-      "projectPath": "D:\\Projects\\ResuniqAI\\ResuniqAI\\ResuniqAI.csproj",
+      "projectPath": "D:\\Projects\\ResuniqAI\\ResuniqAI.csproj",
       "warningLevel": 1,
-      "filePath": "D:\\Projects\\ResuniqAI\\ResuniqAI\\ResuniqAI.csproj",
+      "filePath": "D:\\Projects\\ResuniqAI\\ResuniqAI.csproj",
       "libraryId": "System.Net.Http.Json",
       "targetGraphs": [
         "net10.0"
@@ -140,9 +140,9 @@
       "code": "NU1901",
       "level": "Warning",
       "message": "Package 'NuGet.Packaging' 6.12.1 has a known low severity vulnerability, https://github.com/advisories/GHSA-g4vj-cjjj-v7hg",
-      "projectPath": "D:\\Projects\\ResuniqAI\\ResuniqAI\\ResuniqAI.csproj",
+      "projectPath": "D:\\Projects\\ResuniqAI\\ResuniqAI.csproj",
       "warningLevel": 1,
-      "filePath": "D:\\Projects\\ResuniqAI\\ResuniqAI\\ResuniqAI.csproj",
+      "filePath": "D:\\Projects\\ResuniqAI\\ResuniqAI.csproj",
       "libraryId": "NuGet.Packaging",
       "targetGraphs": [
         "net10.0"
@@ -152,9 +152,9 @@
       "code": "NU1901",
       "level": "Warning",
       "message": "Package 'NuGet.Protocol' 6.12.1 has a known low severity vulnerability, https://github.com/advisories/GHSA-g4vj-cjjj-v7hg",
-      "projectPath": "D:\\Projects\\ResuniqAI\\ResuniqAI\\ResuniqAI.csproj",
+      "projectPath": "D:\\Projects\\ResuniqAI\\ResuniqAI.csproj",
       "warningLevel": 1,
-      "filePath": "D:\\Projects\\ResuniqAI\\ResuniqAI\\ResuniqAI.csproj",
+      "filePath": "D:\\Projects\\ResuniqAI\\ResuniqAI.csproj",
       "libraryId": "NuGet.Protocol",
       "targetGraphs": [
         "net10.0"

@@ -1,12 +1,21 @@
+# Build files
 bin/
 obj/
 publish/
-.dotnet/
-artifacts/
 
+# .NET
+.dotnet/
+
+# Database
 *.db
 *.sqlite
 
+# IDE
 .vs/
+
+# Artifacts
+artifacts/
+
+# OS files
 Thumbs.db
 .DS_Store
