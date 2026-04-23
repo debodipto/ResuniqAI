@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
 using ResuniqAI.Data;
 using ResuniqAI.Models;
 using ResuniqAI.ViewModels;
@@ -14,11 +15,16 @@ namespace ResuniqAI.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly ILogger<ProfileController> _logger;
 
-        public ProfileController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public ProfileController(
+            ApplicationDbContext context,
+            UserManager<IdentityUser> userManager,
+            ILogger<ProfileController> logger)
         {
             _context = context;
             _userManager = userManager;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
@@ -30,18 +36,9 @@ namespace ResuniqAI.Controllers
             if (user == null)
                 return Challenge();
 
-            var profile = await _context.UserProfiles.FirstOrDefaultAsync(x => x.UserId == user.Id)
-                ?? BuildDefaultProfile(user);
-
-            var resumes = await _context.Resumes
-                .Where(x => x.UserId == user.Id)
-                .OrderByDescending(x => x.Id)
-                .ToListAsync();
-
-            var payments = await _context.Payments
-                .Where(x => x.UserEmail == (user.Email ?? string.Empty))
-                .OrderByDescending(x => x.CreatedAt)
-                .ToListAsync();
+            var profile = await GetStoredProfileAsync(user) ?? BuildDefaultProfile(user);
+            var resumes = await GetUserResumesSafeAsync(user.Id);
+            var payments = await GetUserPaymentsSafeAsync(user.Email ?? string.Empty);
 
             return View(new ProfileDashboardViewModel
             {
@@ -68,7 +65,18 @@ namespace ResuniqAI.Controllers
             if (user == null)
                 return Challenge();
 
-            var profile = await _context.UserProfiles.FirstOrDefaultAsync(x => x.UserId == user.Id);
+            UserProfile? profile;
+
+            try
+            {
+                profile = await _context.UserProfiles.FirstOrDefaultAsync(x => x.UserId == user.Id);
+            }
+            catch (Exception ex) when (IsSchemaIssue(ex))
+            {
+                _logger.LogWarning(ex, "Profile storage query failed for user {UserId}. Falling back to a new profile record.", user.Id);
+                profile = null;
+            }
+
             if (profile == null)
             {
                 profile = BuildDefaultProfile(user);
@@ -107,15 +115,14 @@ namespace ResuniqAI.Controllers
                 model.Profile = profile;
                 model.Email = user.Email ?? normalizedEmail;
                 model.IsPro = await _userManager.IsInRoleAsync(user, "Pro");
-                model.ResumeCount = await _context.Resumes.CountAsync(x => x.UserId == user.Id);
-                model.PremiumResumeCount = await _context.Resumes.CountAsync(x => x.UserId == user.Id && x.TemplateKey != null && !x.TemplateKey.StartsWith("ats-", StringComparison.OrdinalIgnoreCase));
-                model.PaymentCount = await _context.Payments.CountAsync(x => x.UserEmail == (user.Email ?? string.Empty));
-                model.ApprovedPaymentCount = await _context.Payments.CountAsync(x => x.UserEmail == (user.Email ?? string.Empty) && x.IsApproved);
-                model.Resumes = await _context.Resumes
-                    .Where(x => x.UserId == user.Id)
-                    .OrderByDescending(x => x.Id)
-                    .Take(8)
-                    .ToListAsync();
+                var resumes = await GetUserResumesSafeAsync(user.Id);
+                var payments = await GetUserPaymentsSafeAsync(user.Email ?? string.Empty);
+
+                model.ResumeCount = resumes.Count;
+                model.PremiumResumeCount = resumes.Count(x => x.TemplateKey != null && !x.TemplateKey.StartsWith("ats-", StringComparison.OrdinalIgnoreCase));
+                model.PaymentCount = payments.Count;
+                model.ApprovedPaymentCount = payments.Count(x => x.IsApproved);
+                model.Resumes = resumes.Take(8).ToList();
                 model.IdentityUser = user;
 
                 return View(model);
@@ -138,6 +145,59 @@ namespace ResuniqAI.Controllers
         }
 
         private static string Normalize(string? value) => value?.Trim() ?? string.Empty;
+
+        private async Task<UserProfile?> GetStoredProfileAsync(IdentityUser user)
+        {
+            try
+            {
+                return await _context.UserProfiles.FirstOrDefaultAsync(x => x.UserId == user.Id);
+            }
+            catch (Exception ex) when (IsSchemaIssue(ex))
+            {
+                _logger.LogWarning(ex, "Profile query failed for user {UserId}. Returning default profile.", user.Id);
+                return null;
+            }
+        }
+
+        private async Task<List<Resume>> GetUserResumesSafeAsync(string userId)
+        {
+            try
+            {
+                return await _context.Resumes
+                    .Where(x => x.UserId == userId)
+                    .OrderByDescending(x => x.Id)
+                    .ToListAsync();
+            }
+            catch (Exception ex) when (IsSchemaIssue(ex))
+            {
+                _logger.LogWarning(ex, "Resume query failed for profile dashboard user {UserId}. Returning no resumes.", userId);
+                return new List<Resume>();
+            }
+        }
+
+        private async Task<List<Payment>> GetUserPaymentsSafeAsync(string userEmail)
+        {
+            try
+            {
+                return await _context.Payments
+                    .Where(x => x.UserEmail == userEmail)
+                    .OrderByDescending(x => x.CreatedAt)
+                    .ToListAsync();
+            }
+            catch (Exception ex) when (IsSchemaIssue(ex))
+            {
+                _logger.LogWarning(ex, "Payment query failed for profile dashboard email {Email}. Returning no payments.", userEmail);
+                return new List<Payment>();
+            }
+        }
+
+        private static bool IsSchemaIssue(Exception ex)
+        {
+            if (ex is SqliteException)
+                return true;
+
+            return ex.InnerException is SqliteException;
+        }
 
         private async Task EnsureProfileStorageAsync()
         {
